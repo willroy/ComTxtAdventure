@@ -1,3 +1,9 @@
-  -  Get the Yaml to work
-  -  Start work on the gameplay
-        - Make gameloop etc etc
+have to fix the load fuction because of slight change :(
+
+commands that work:
+ - quit
+ - north #no actual movement just says if you can go this direction
+ - south #no actual movement just says if you can go this direction
+ - east #no actual movement just says if you can go this direction
+ - west #no actual movement just says if you can go this direction
+ - 

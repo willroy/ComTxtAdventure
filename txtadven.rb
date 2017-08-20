@@ -24,20 +24,42 @@ class Character
 end
 
 class Room
-    def initialize(roominfo=default_room_info())
+    def initialize(general_info, roominfo=default_room_info())
         @roominfo = roominfo
+        @general_info = general_info
     end
     def default_room_info
         data = {
             1 => {:name => "Starting Room", :items => {"Starting Sword" => {:type => "Weapon"}}, :npcs => "NONE", :exits => {"Hallway" => "NORTH"}, :in? => true},
             2 => {:name => "Hallway", :items => {"Potion" => {:type => "Consumable"}}, :npcs => "Goblin", :exits => ["NORTH", "WEST"], :in? => false}
         }
-        File.open("roominfo.yml", "w") {|f| f.write(data.to_yaml) }
-        return data
+        File.open("roominfo.yaml", "w") {|f| f.write(data.to_yaml) }
+        roominfo = YAML::load_file('roominfo.yaml')
+        return roominfo
     end
     def move(dir)
-        for i in @roominfo
-
+        @roominfo.each do |key, value|
+            value.each do |k, v|
+                if v == true
+                    @general_info['current_room'] = key
+                end
+            end
+        end            
+        @roominfo.each do |key, value|
+            if key == @general_info["current_room"]
+                value.each do |k, v|
+                    if k.to_s() == "exits"
+                        v.each do |ke, val|
+                            if val == dir
+                                puts "You go #{dir}"
+                            elsif
+                                puts "You cannot go in this direction"
+                            end
+                        end
+                    end
+                end
+            end
+        end
     end
 end
 
@@ -52,12 +74,16 @@ class Game
         gametype = gets.chomp
         if gametype.upcase == "NEW" #creates new info for the yml for new game
             data = {"name" => "NAME", "health" => "100", "items" => {"name" => "Flashlight"}}
+            data2 = {"current_room" => 1}
             File.open("characters.yaml", "w") {|f| f.write(data.to_yaml) }
             charinfo = YAML::load_file('characters.yaml')
+            File.open("general_info.yaml", "w") {|f| f.write(data2.to_yaml) }
+            general_info = YAML::load_file("general_info.yaml")
             @character = Character.new(charinfo)
             @character.change_name()
-            @room = Room.new
-        elsif gametype == "LOAD" #does the same thing as NEW but puts past data by loading
+            @room = Room.new(general_info)
+            true
+        elsif gametype.upcase == "LOAD" #does the same thing as NEW but puts past data by loading
             begin
                 charinfo = YAML::load(File.open('characters.yaml')) 
             rescue ArgumentError => e #just in case
@@ -66,35 +92,42 @@ class Game
             @character = Character.new(charinfo)
 
             begin 
-                roominfo = YAML::load(File.open('roominfo.yml'))
+                roominfo = YAML::load(File.open('roominfo.yaml'))
             rescue ArgumentError => e
                 puts "Could not parse ROOM YAML: #{e.message}"
             end
             @room = Room.new(roominfo)
+            false
+        else
+            puts ""
+            puts "Invalid Input Option"
+            puts "Quitting!"
+            abort
         end
     end
     def game_loop
         while true do
             command_test()
-            quit if @quit == true
+            abort if @quit == true
         end
     end
     def command_test()
         print "=> "
-        command = gets.chomp
-        save_game() if command.upcase == "SAVE"
-        load_game() if command.upcase == "LOAD"
-        @room.move("NORTH") if command.upcase == "NORTH" 
-        @room.move("SOUTH") if command.upcase == "SOUTH"
-        @room.move("EAST") if command.upcase == "EAST"
-        @room.move("WEST") if command.upcase == "WEST"
-        @character.inventory() if command.upcase == "INVENTORY"
-        if command.upcase == "EXAMINE"
+        command = gets.chomp.upcase
+        save_game() if command == "SAVE"
+        load_game() if command == "LOAD"
+        @room.room_in_desc() if command == "ROOM"
+        @room.move("NORTH") if command == "NORTH" 
+        @room.move("SOUTH") if command == "SOUTH"
+        @room.move("EAST") if command == "EAST"
+        @room.move("WEST") if command == "WEST"
+        @character.inventory() if command == "INVENTORY"
+        if command == "EXAMINE"
             puts "Which item? "
             item = gets.chomp
             @character.examine(item.lowercase) 
         end
-        @quit = true if command.upcase = "QUIT" 
+        @quit = true if command == "QUIT" 
     end
     def start_game
         puts "You wake up in an empty room"
@@ -114,6 +147,10 @@ class Game
 end
 
 game = Game.new
-game.init_game()
-game.start_game
-end 
+if game.init_game() == true
+    game.start_game 
+elsif
+    puts ""
+    puts "You wake up back where you were..."
+    game.game_loop
+end
