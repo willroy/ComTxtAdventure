@@ -4,7 +4,9 @@
   :items:
     Starting Sword:
       :type: Weapon
-  :npcs: NONE
+  :npcs:
+    NONE:
+      :type: NONE
   :exits:
     Hallway: NORTH
   :in?: true
@@ -13,7 +15,9 @@
   :items:
     Potion:
       :type: Consumable
-  :npcs: Goblin
+  :npcs:
+    Goblin:
+      :type: enemy
   :exits:
   - NORTH
   - WEST

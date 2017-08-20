@@ -30,8 +30,8 @@ class Room
     end
     def default_room_info
         data = {
-            1 => {:name => "Starting Room", :items => {"Starting Sword" => {:type => "Weapon"}}, :npcs => "NONE", :exits => {"Hallway" => "NORTH"}, :in? => true},
-            2 => {:name => "Hallway", :items => {"Potion" => {:type => "Consumable"}}, :npcs => "Goblin", :exits => ["NORTH", "WEST"], :in? => false}
+            1 => {:name => "Starting Room", :items => {"Starting Sword" => {:type => "Weapon"}}, :npcs => {"NONE" => {:type => "NONE"}}, :exits => {"Hallway" => "NORTH"}, :in? => true},
+            2 => {:name => "Hallway", :items => {"Potion" => {:type => "Consumable"}}, :npcs => {"Goblin" => {:type => "enemy"}}, :exits => ["NORTH", "WEST"], :in? => false}
         }
         File.open("roominfo.yaml", "w") {|f| f.write(data.to_yaml) }
         roominfo = YAML::load_file('roominfo.yaml')
@@ -57,6 +57,20 @@ class Room
                             end
                         end
                     end
+                end
+            end
+        end
+    end
+    def room_in_desc
+        puts "1"
+        @roominfo.each do |key, value|
+            if key == @general_info["current_room"]
+                puts "You are in the #{value[:name]}"
+                value[:items].each do |k, v|
+                    puts "Items in this room: #{k}"
+                end
+                value[:npcs].each do |k, v|
+                    puts "Npcs in this room: #{k}"
                 end
             end
         end
@@ -96,7 +110,12 @@ class Game
             rescue ArgumentError => e
                 puts "Could not parse ROOM YAML: #{e.message}"
             end
-            @room = Room.new(roominfo)
+            begin 
+                general_info = YAML::load(File.open('general_info.yaml'))
+            rescue ArgumentError => e
+                puts "Could not parse GENERAL YAML: #{e.message}"
+            end
+            @room = Room.new(general_info, roominfo)
             false
         else
             puts ""
@@ -147,9 +166,10 @@ class Game
 end
 
 game = Game.new
-if game.init_game() == true
+option = game.init_game()
+if option == true
     game.start_game 
-elsif
+elsif option == false
     puts ""
     puts "You wake up back where you were..."
     game.game_loop

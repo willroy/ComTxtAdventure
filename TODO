@@ -6,4 +6,5 @@ commands that work:
  - south #no actual movement just says if you can go this direction
  - east #no actual movement just says if you can go this direction
  - west #no actual movement just says if you can go this direction
+ - room #to list npcs, room name and items
  - 
