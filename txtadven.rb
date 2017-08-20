@@ -15,7 +15,9 @@ class Character
     end
     def inventory
         puts "Inventory:"
-        for item in @charinfo['items'] do {|i| puts "#{i['name']}"}
+        for item in @charinfo['items'] 
+            puts "#{item['name']}"
+        end
     end
 end
 
@@ -25,8 +27,8 @@ class Room
     end
     def default_room_info
         data = {
-            "1" => {"name" => "Starting Room", "Items" => {"Starting Sword" => {"Type" => "Weapon"}}, "npcs" => "NONE"}
-            "2" => {"name" => "Hallway", "Items" => {"Potion" => {"Type" => "Consumable"}}, "npcs" => "Goblin"}
+            1 => {:name => "Starting Room", :items => {"Starting Sword" => {:type => "Weapon"}}, :npcs => "NONE"},
+            2 => {:name => "Hallway", :items => {"Potion" => {:type => "Consumable"}}, :npcs => "Goblin"}
         }
         File.open("roominfo.yml", "w") {|f| f.write(data.to_yaml) }
         return data
@@ -42,7 +44,7 @@ class Game
         puts "New Game or Load Game? (NEW / LOAD) => "
         gametype = gets.chomp
         if gametype == "NEW" #creates new info for the yml for new game
-            data = {"name" => "NAME", "health" => "100", "items" => {}}
+            data = {"name" => "NAME", "health" => "100", "items" => {"name" => "Flashlight"}}
             charinfo = YAML::load_file('charinfo.yml')
             @character = Character.new(charinfo)
             @character.data_input()
@@ -78,6 +80,11 @@ class Game
         east() if command.upcase = "EAST"
         west() if command.upcase = "WEST"
         @character.inventory() if command.upcase = "INVENTORY"
+        if command.upcase = "EXAMINE"
+            puts "Which item? "
+            item = gets.chomp
+            @character.examine(item.lowercase) 
+        end
         quit() if command.upcase = "QUIT" 
     end
     def start_game
@@ -85,12 +92,16 @@ class Game
         puts "#{@character["name"]} => Where am I?"
         puts "You see a door to the north of the room"
         puts "Would you like a tutorial? (Y/n) "
-        tutorial = gets.chomp
-        if tutorial.upcase = "Y"
-            
-        elsif
-        
+        tut = gets.chomp
+        if tut.upcase = "Y"
+            puts "Running tutorial..."
+            tutorial()
+        elsif tut.upcase = "N"
+            puts "Ok!"
+
         end
     end
 end
 
+game = Game.new
+game.init_game()
