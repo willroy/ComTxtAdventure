@@ -1,0 +1,20 @@
+---
+1:
+  :name: Starting Room
+  :items:
+    Starting Sword:
+      :type: Weapon
+  :npcs: NONE
+  :exits:
+    Hallway: NORTH
+  :in?: true
+2:
+  :name: Hallway
+  :items:
+    Potion:
+      :type: Consumable
+  :npcs: Goblin
+  :exits:
+  - NORTH
+  - WEST
+  :in?: false
