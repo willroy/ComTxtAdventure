@@ -13,6 +13,10 @@ class Character
         File.open('charinfo.yml', 'w') {|f| f.write name.to_yaml } 
         puts "Hello #{@name}" #show to player the name
     end
+    def inventory
+        puts "Inventory:"
+        for item in @charinfo['items'] do {|i| puts "#{i['name']}"}
+    end
 end
 
 class Room
@@ -56,6 +60,36 @@ class Game
             rescue ArgumentError => e
                 puts "Could not parse ROOM YAML: #{e.message}"
             end
+        end
+    end
+    def game_loop
+        while True do
+            command_test()
+
+        end
+    end
+    def command_test()
+        puts "=> "
+        command = gets.chomp
+        save_game() if command.upcase = "SAVE"
+        load_game() if command.upcase = "LOAD"
+        north() if command.upcase = "NORTH" 
+        south() if command.upcase = "SOUTH"
+        east() if command.upcase = "EAST"
+        west() if command.upcase = "WEST"
+        @character.inventory() if command.upcase = "INVENTORY"
+        quit() if command.upcase = "QUIT" 
+    end
+    def start_game
+        puts "You wake up in an empty room"
+        puts "#{@character["name"]} => Where am I?"
+        puts "You see a door to the north of the room"
+        puts "Would you like a tutorial? (Y/n) "
+        tutorial = gets.chomp
+        if tutorial.upcase = "Y"
+            
+        elsif
+        
         end
     end
 end
