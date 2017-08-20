@@ -11,7 +11,7 @@ class Character
         puts "Character name? => " #input text
         @name = gets.chomp #get input
 
-        @charinfo['name'] = @name #Modify
+        @charinfo[:name] = @name #Modify
         File.open('characters.yaml', 'w') {|f| f.write @charinfo.to_yaml } 
         puts "Hello #{@name}" #show to player the name
     end
@@ -31,38 +31,42 @@ class Room
     def default_room_info
         data = {
             1 => {:name => "Starting Room", :items => {"Starting Sword" => {:type => "Weapon"}}, :npcs => {"NONE" => {:type => "NONE"}}, :exits => {"Hallway" => "NORTH"}, :in? => true},
-            2 => {:name => "Hallway", :items => {"Potion" => {:type => "Consumable"}}, :npcs => {"Goblin" => {:type => "enemy"}}, :exits => ["NORTH", "WEST"], :in? => false}
+            2 => {:name => "Hallway", :items => {"Potion" => {:type => "Consumable"}}, :npcs => {"Goblin" => {:type => "enemy"}}, :exits => {"Throne Room" => "WEST", "Starting Room" => "SOUTH"}, :in? => false}
         }
         File.open("roominfo.yaml", "w") {|f| f.write(data.to_yaml) }
         roominfo = YAML::load_file('roominfo.yaml')
         return roominfo
     end
     def move(dir)
-        @roominfo.each do |key, value|
-            value.each do |k, v|
-                if v == true
-                    @general_info['current_room'] = key
-                end
-            end
-        end            
+        goingto = ""
+        breakk = false
         @roominfo.each do |key, value|
             if key == @general_info["current_room"]
-                value.each do |k, v|
-                    if k.to_s() == "exits"
-                        v.each do |ke, val|
-                            if val == dir
-                                puts "You go #{dir}"
-                            elsif
-                                puts "You cannot go in this direction"
+                value[:in?] = false
+                value[:exits].each do |k, v|
+                    if v == dir 
+                        goingto = k
+                        puts "You go #{dir}"
+                    end
+                end
+
+                breakk = true
+                @roominfo.each do |k, v|
+                    v.each do |ke, val|
+                        if ke.to_s() == "name" 
+                            if val.to_s() == goingto.to_s()
+                                v[:in?] = true
+                                @general_info["current_room"] = k
+                                File.open('general_info.yaml', 'w') {|f| f.write @general_info.to_yaml } 
                             end
                         end
                     end
                 end
             end
+            break if breakk == true      
         end
     end
     def room_in_desc
-        puts "1"
         @roominfo.each do |key, value|
             if key == @general_info["current_room"]
                 puts "You are in the #{value[:name]}"
@@ -87,7 +91,7 @@ class Game
         puts "New Game or Load Game? (NEW / LOAD) => "
         gametype = gets.chomp
         if gametype.upcase == "NEW" #creates new info for the yml for new game
-            data = {"name" => "NAME", "health" => "100", "items" => {"name" => "Flashlight"}}
+            data = {:name => "NAME", :health => "100", :items => {:name => "Flashlight"}}
             data2 = {"current_room" => 1}
             File.open("characters.yaml", "w") {|f| f.write(data.to_yaml) }
             charinfo = YAML::load_file('characters.yaml')

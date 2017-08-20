@@ -1,10 +1,8 @@
-have to fix the load fuction because of slight change :(
-
 commands that work:
  - quit
- - north #no actual movement just says if you can go this direction
- - south #no actual movement just says if you can go this direction
- - east #no actual movement just says if you can go this direction
- - west #no actual movement just says if you can go this direction
+ - north 
+ - south #CAN MOVE NOW 
+ - east 
+ - west
  - room #to list npcs, room name and items
  - 

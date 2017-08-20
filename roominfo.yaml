@@ -19,6 +19,6 @@
     Goblin:
       :type: enemy
   :exits:
-  - NORTH
-  - WEST
+    Throne Room: WEST
+    Starting Room: SOUTH
   :in?: false
