@@ -1,4 +1,4 @@
-do tutorial
+finish tutorial
 
 commands that work:
  - quit
@@ -8,4 +8,4 @@ commands that work:
  - west
  - room #to list npcs, room name and items
  - inv / inventory
- - 
+ - examine # lists use and type 

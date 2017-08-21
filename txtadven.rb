@@ -20,7 +20,20 @@ class Character
         @charinfo.each do |key, value|
             if key.to_s() == "items"
                 value.each do |k, v|
-                    puts v
+                    puts "#{k}"
+                end
+            end
+        end
+    end
+    def examine
+        puts "Which Item? "
+        item = gets.chomp
+        @charinfo.each do |key, value|
+            if key.to_s() == "items"
+                value.each do |k, v|
+                    if k = item
+                        puts "\n#{item} is a #{v[:type]} that: \n #{v[:use]}"
+                    end
                 end
             end
         end
@@ -34,8 +47,8 @@ class Room
     end
     def default_room_info
         data = {
-            1 => {:name => "Starting Room", :items => {"Starting Sword" => {:type => "Weapon"}}, :npcs => {"NONE" => {:type => "NONE"}}, :exits => {"Hallway" => "NORTH"}, :in? => true},
-            2 => {:name => "Hallway", :items => {"Potion" => {:type => "Consumable"}}, :npcs => {"Goblin" => {:type => "enemy"}}, :exits => {"Throne Room" => "WEST", "Starting Room" => "SOUTH"}, :in? => false}
+            1 => {:name => "Starting Room", :items => {"Starting Sword" => {:type => "Weapon", :use => "This item can be used to attack enemies"}}, :npcs => {"NONE" => {:type => "NONE"}}, :exits => {"Hallway" => "NORTH"}, :in? => true},
+            2 => {:name => "Hallway", :items => {"Potion" => {:type => "Consumable", :use => "This can be used to gain health during battle."}}, :npcs => {"Goblin" => {:type => "enemy"}}, :exits => {"Throne Room" => "WEST", "Starting Room" => "SOUTH"}, :in? => false}
         }
         File.open("roominfo.yaml", "w") {|f| f.write(data.to_yaml) }
         roominfo = YAML::load_file('roominfo.yaml')
@@ -95,7 +108,7 @@ class Game
         puts "New Game or Load Game? (NEW / LOAD) => "
         gametype = gets.chomp
         if gametype.upcase == "NEW" #creates new info for the yml for new game
-            data = {:name => "NAME", :health => "100", :items => {:name => "Flashlight"}}
+            data = {:name => "NAME", :health => "100", :items => {"Flashlight" => {:type => "Tool", use: "Lights up dark areas"}}}
             data2 = {"current_room" => 1}
             File.open("characters.yaml", "w") {|f| f.write(data.to_yaml) }
             charinfo = YAML::load_file('characters.yaml')
@@ -156,12 +169,15 @@ class Game
         @room.move("EAST") if command == "EAST"
         @room.move("WEST") if command == "WEST"
         @character.inventory() if command == "INVENTORY" or command == "INV"
-        if command == "EXAMINE"
-            puts "Which item? "
-            item = gets.chomp
-            @character.examine(item.lowercase) 
-        end
+        @character.examine() if command == "EXAMINE" or command == "EXAM"
         @quit = true if command == "QUIT" 
+    end
+    def tutorial
+        puts "\n\n To control your game you have to use commands to navigate"
+        puts "through the area and to interact with things and find out more"
+        puts "about your surroundings"
+        
+        puts "\n The first commands you will be taught is "
     end
     def start_game
         puts "You wake up in an empty room"

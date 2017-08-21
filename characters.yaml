@@ -2,4 +2,6 @@
 :name: BOB
 :health: '100'
 :items:
-  :name: Flashlight
+  Flashlight:
+    :type: Tool
+    :use: Lights up dark areas

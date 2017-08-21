@@ -4,6 +4,7 @@
   :items:
     Starting Sword:
       :type: Weapon
+      :use: This item can be used to attack enemies
   :npcs:
     NONE:
       :type: NONE
@@ -15,6 +16,7 @@
   :items:
     Potion:
       :type: Consumable
+      :use: This can be used to gain health during battle.
   :npcs:
     Goblin:
       :type: enemy
