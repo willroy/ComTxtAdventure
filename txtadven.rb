@@ -59,6 +59,7 @@ class Room
     def move(dir)
         goingto = ""
         breakk = false
+        cango = "maybe"
         @roominfo.each do |key, value|
             if key == @general_info["current_room"]
                 value[:in?] = false
@@ -66,8 +67,12 @@ class Room
                     if v == dir 
                         goingto = k
                         puts "You go #{dir}"
+                        cango = "true"
+                        break
                     end
+                    cango = "false"
                 end
+                
 
                 breakk = true
                 @roominfo.each do |k, v|
@@ -84,6 +89,7 @@ class Room
             end
             break if breakk == true      
         end
+        puts "You cannot go in this direction" if cango == "false"
     end
     def room_in_desc
         @roominfo.each do |key, value|
@@ -113,12 +119,8 @@ class Game
         puts "New Game or Load Game? (NEW / LOAD) => "
         gametype = gets.chomp
         if gametype.upcase == "NEW" #creates new info for the yml for new game
-            data = {:name => "NAME", :health => "100", :items => {"Flashlight" => {:type => "Tool", use: "Lights up dark areas"}}}
-            data2 = {"current_room" => 1}
-            File.open("characters.yaml", "w") {|f| f.write(data.to_yaml) }
-            charinfo = YAML::load_file('characters.yaml')
-            File.open("general_info.yaml", "w") {|f| f.write(data2.to_yaml) }
-            general_info = YAML::load_file("general_info.yaml")
+            charinfo = YAML::load_file('defaultchar.yaml')
+            general_info = YAML::load_file('generaldefault.yaml')
             @character = Character.new(charinfo)
             @character.change_name()
             @room = Room.new(general_info)
@@ -164,6 +166,7 @@ class Game
             puts "\nQuitting... #{e.message}"
             abort
         end
+        commands() if command == "COMMAND"
         save_game() if command == "SAVE"
         load_game() if command == "LOAD"
         @room.room_in_desc() if command == "ROOM"
@@ -176,6 +179,9 @@ class Game
         @character.inventory() if command == "INVENTORY" or command == "INV"
         @character.examine() if command == "EXAMINE" or command == "EXAM"
         @quit = true if command == "QUIT" 
+    end
+    def save_game()
+        
     end
     def tutorial
         puts "\n\n To control your game you have to use commands to navigate"
