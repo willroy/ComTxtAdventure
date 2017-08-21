@@ -48,8 +48,10 @@ class Room
     def default_room_info
         data = {
             1 => {:name => "Starting Room", :items => {"Starting Sword" => {:type => "Weapon", :use => "This item can be used to attack enemies"}}, :npcs => {"NONE" => {:type => "NONE"}}, :exits => {"Hallway" => "NORTH"}, :in? => true},
-            2 => {:name => "Hallway", :items => {"Potion" => {:type => "Consumable", :use => "This can be used to gain health during battle."}}, :npcs => {"Goblin" => {:type => "enemy"}}, :exits => {"Throne Room" => "WEST", "Starting Room" => "SOUTH"}, :in? => false}
-        }
+            2 => {:name => "Hallway", :items => {"Potion" => {:type => "Consumable", :use => "This can be used to gain health during battle."}}, :npcs => {"Goblin" => {:type => "enemy"}}, :exits => {"Throne Room" => "WEST", "Starting Room" => "SOUTH"}, :in? => false},
+            3 => {:name => "Throne Room", :items => {"Gold" => {:type => "Money", :use => "Used for buying stuff"}}, :npcs => {"Skeleton" => {:type => "enemy"}}, :exits => {"Hallway" => "EAST", "Treasure Room" => "WEST", "Hallway 2" => "SOUTH"}, :in? => false},      
+            4 => {:name => "Treasure Room", :items => {"Gold" => {:type => "Money", :use => "Used for buying stuff"}}, :npcs => {"NONE" => {:type => "NONE"}}, :exits => {"Throne Room" => "EAST"}, :in? => false},
+            5 => {:name => "Hallway 2", :items => {"NONE" => {:type => "NONE", :use => "NONE"}}, :npcs => {"NONE" => {:type => "NONE"}}, :exits => {"Throne Room" => "NORTH"}, :in? => false}}
         File.open("roominfo.yaml", "w") {|f| f.write(data.to_yaml) }
         roominfo = YAML::load_file('roominfo.yaml')
         return roominfo
@@ -92,6 +94,9 @@ class Room
                 end
                 value[:npcs].each do |k, v|
                     puts "Npcs in this room: #{k}"
+                end
+                value[:exits].each do |k, v|
+                    puts "There is the #{k} to the #{v}"
                 end
             end
         end
