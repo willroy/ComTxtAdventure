@@ -41,20 +41,9 @@ class Character
 end
 
 class Room
-    def initialize(general_info, roominfo=default_room_info())
+    def initialize(general_info, roominfo)
         @roominfo = roominfo
         @general_info = general_info
-    end
-    def default_room_info
-        data = {
-            1 => {:name => "Starting Room", :items => {"Starting Sword" => {:type => "Weapon", :use => "This item can be used to attack enemies"}}, :npcs => {"NONE" => {:type => "NONE"}}, :exits => {"Hallway" => "NORTH"}, :in? => true},
-            2 => {:name => "Hallway", :items => {"Potion" => {:type => "Consumable", :use => "This can be used to gain health during battle."}}, :npcs => {"Goblin" => {:type => "enemy"}}, :exits => {"Throne Room" => "WEST", "Starting Room" => "SOUTH"}, :in? => false},
-            3 => {:name => "Throne Room", :items => {"Gold" => {:type => "Money", :use => "Used for buying stuff"}}, :npcs => {"Skeleton" => {:type => "enemy"}}, :exits => {"Hallway" => "EAST", "Treasure Room" => "WEST", "Hallway 2" => "SOUTH"}, :in? => false},      
-            4 => {:name => "Treasure Room", :items => {"Gold" => {:type => "Money", :use => "Used for buying stuff"}}, :npcs => {"NONE" => {:type => "NONE"}}, :exits => {"Throne Room" => "EAST"}, :in? => false},
-            5 => {:name => "Hallway 2", :items => {"NONE" => {:type => "NONE", :use => "NONE"}}, :npcs => {"NONE" => {:type => "NONE"}}, :exits => {"Throne Room" => "NORTH"}, :in? => false}}
-        File.open("roominfo.yaml", "w") {|f| f.write(data.to_yaml) }
-        roominfo = YAML::load_file('roominfo.yaml')
-        return roominfo
     end
     def move(dir)
         goingto = ""
@@ -121,9 +110,10 @@ class Game
         if gametype.upcase == "NEW" #creates new info for the yml for new game
             charinfo = YAML::load_file('defaultchar.yaml')
             general_info = YAML::load_file('generaldefault.yaml')
+            roominfo = YAML::load_file('roomdefault.yaml')
             @character = Character.new(charinfo)
             @character.change_name()
-            @room = Room.new(general_info)
+            @room = Room.new(general_info, roominfo)
             true
         elsif gametype.upcase == "LOAD" #does the same thing as NEW but puts past data by loading
             begin
