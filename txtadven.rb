@@ -17,8 +17,12 @@ class Character
     end
     def inventory
         puts "Inventory:"
-        for item in @charinfo['items'] 
-            puts "#{item['name']}"
+        @charinfo.each do |key, value|
+            if key.to_s() == "items"
+                value.each do |k, v|
+                    puts v
+                end
+            end
         end
     end
 end
@@ -136,15 +140,22 @@ class Game
     end
     def command_test()
         print "=> "
-        command = gets.chomp.upcase
+        begin
+            command = gets.chomp.upcase
+        rescue Exception => e
+            puts "\nQuitting... #{e.message}"
+            abort
+        end
         save_game() if command == "SAVE"
         load_game() if command == "LOAD"
         @room.room_in_desc() if command == "ROOM"
+        @room.pickup() if command == "PICKUP"
+        @room.putdown() if command == "PUTDOWN"
         @room.move("NORTH") if command == "NORTH" 
         @room.move("SOUTH") if command == "SOUTH"
         @room.move("EAST") if command == "EAST"
         @room.move("WEST") if command == "WEST"
-        @character.inventory() if command == "INVENTORY"
+        @character.inventory() if command == "INVENTORY" or command == "INV"
         if command == "EXAMINE"
             puts "Which item? "
             item = gets.chomp
