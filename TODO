@@ -9,3 +9,5 @@ commands that work:
  - room #to list npcs, room name and items
  - inv / inventory
  - examine # lists use and type 
+ - load
+ - save
