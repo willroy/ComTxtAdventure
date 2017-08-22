@@ -1,71 +1,50 @@
 ---
 - :name: BOB
   :health: '100'
-  :items:
-    Flashlight:
-      :type: Tool
-      :use: Lights up dark areas
+  items:
+  - Flashlight
 - 1:
     :name: Starting Room
-    :items:
-      Starting Sword:
-        :type: Weapon
-        :use: This item can be used to attack enemies
-    :npcs:
-      NONE:
-        :type: NONE
+    items:
+    - Starting Sword
+    npcs: 
     :exits:
       Hallway: NORTH
     :in?: false
   2:
     :name: Hallway
-    :items:
-      Potion:
-        :type: Consumable
-        :use: This can be used to gain health during battle.
-    :npcs:
-      Goblin:
-        :type: enemy
+    items:
+    - Potion
+    npcs:
+    - Goblin
     :exits:
       Throne Room: WEST
       Starting Room: SOUTH
-    :in?: true
+    :in?: false
   3:
     :name: Throne Room
-    :items:
-      Gold:
-        :type: Money
-        :use: Used for buying stuff
-    :npcs:
-      Skeleton:
-        :type: enemy
+    items:
+    - Gold
+    npcs:
+    - Skeleton
     :exits:
       Hallway: EAST
       Treasure Room: WEST
       Hallway 2: SOUTH
-    :in?: false
+    :in?: true
   4:
     :name: Treasure Room
-    :items:
-      Gold:
-        :type: Money
-        :use: Used for buying stuff
-    :npcs:
-      NONE:
-        :type: NONE
+    items:
+    - Gold
+    npcs: 
     :exits:
       Throne Room: EAST
     :in?: false
   5:
     :name: Hallway 2
-    :items:
-      NONE:
-        :type: NONE
-        :use: NONE
-    :npcs:
-      NONE:
-        :type: NONE
+    items: 
+    npcs: 
     :exits:
       Throne Room: NORTH
     :in?: false
-- current_room: 2
+- current_room: 3

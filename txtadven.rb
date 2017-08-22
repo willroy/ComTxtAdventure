@@ -24,14 +24,22 @@ class Character
     def examine
         puts "Which Item? "
         item = gets.chomp
+        gotitem = false
         $charinfo.each do |key, value|
             if key.to_s() == "items"
-                value.each do |k, v|
-                    if k = item
-                        puts "\n#{item} is a #{v[:type]} that: \n #{v[:use]}"
-                    end
+                value.each do |v|
+                    gotitem = true if item == v
                 end
             end
+        end
+        if gotitem == true
+            $items.each do |key, value|
+                if value[:name] == item
+                    puts "#{value[:name]} is type #{value[:type]} and it:\n #{value[:use]}"
+                end
+            end
+        elsif gotitem == false
+            puts "You cannot examine an item you do not have"
         end
     end
 end
@@ -75,12 +83,8 @@ class Room
         roominfo.each do |key, value|
             if key == $general_info["current_room"]
                 puts "You are in the #{value[:name]}"
-                value[:items].each do |k, v|
-                    puts "Items in this room: #{k}"
-                end
-                value[:npcs].each do |k, v|
-                    puts "Npcs in this room: #{k}"
-                end
+                value['items'].each {|k| puts "Items in room: #{k}"} unless value['items'] == nil
+                value['npcs'].each {|k| puts "Npcs in room: #{k}"} unless value['npcs'] == nil 
                 value[:exits].each do |k, v|
                     puts "There is the #{k} to the #{v}"
                 end
@@ -97,6 +101,8 @@ class Game
         $roominfo
         $general_info
         $charinfo
+        $items
+        $npcs
         @savegame
     end
     def init_game
@@ -106,12 +112,16 @@ class Game
             $charinfo = YAML::load_file('defaultchar.yaml')
             $general_info = YAML::load_file('generaldefault.yaml')
             $roominfo = YAML::load_file('roomdefault.yaml')
+            $items = YAML::load_file('itemlist.yaml')
+            $npcs = YAML::load_file('npclist.yaml')
             @character = Character.new
             @character.change_name()
             @room = Room.new
             true
         elsif gametype.upcase == "LOAD" #does the same thing as NEW but different file
             @savegame = YAML::load(File.open('savegame.yaml'))
+            $items = YAML::load_file('itemlist.yaml')
+            $npcs = YAML::load_file('npclist.yaml')
             count = 1
             @savegame.each do |key, value|
                 #puts key
@@ -160,6 +170,7 @@ class Game
         @room.move("WEST") if command == "WEST"
         @character.inventory() if command == "INVENTORY" or command == "INV"
         @character.examine() if command == "EXAMINE" or command == "EXAM"
+        @character.equip() if command == "EQUIP" or command == "EQ" 
         @quit = true if command == "QUIT" 
     end
     def save_game

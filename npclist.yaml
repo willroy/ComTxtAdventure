@@ -1,0 +1,29 @@
+---
+1:
+  :name: Skeleton
+  :type: enemy
+  :health: 60
+2:
+  :name: Goblin
+  :type: enemy
+  :health: 50
+3:
+  :name: Troll
+  :type: enemy
+  :health: 80
+4:
+  :name: Shopkeeper
+  :type: passive
+  :health: 1000
+5: 
+  :name: Passer-by
+  :type: passive?
+  :health: 999999999
+6: 
+  :name: Wolf
+  :type: enemy
+  :health: 20
+7: 
+  :name: Blob
+  :type: enemy
+  :health: 10

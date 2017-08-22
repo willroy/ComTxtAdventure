@@ -1,0 +1,36 @@
+---
+1:
+  :name: Flashlight
+  :type: tool
+  :use: Lights up dark areas
+  :equip?: false
+2:
+  :name: Gold
+  :type: consumable
+  :use: Buys items from shops
+  :equip?: false
+3:
+  :name: Starting Sword
+  :type: weapon
+  :use: Can attack npcs with this 
+  :equip?: false
+4:
+  :name: Heal Potion
+  :type: consumable
+  :use: can heal wounds
+  :equip?: false
+5: 
+  :name: Bones
+  :type: useless
+  :use: none
+  :equip?: false
+6: 
+  :name: Meat
+  :type: consumable
+  :use: eat to replenish health
+  :equip?: false
+7: 
+  :name: Dagger
+  :type: weapon
+  :use: Can attack npcs with this
+  :equip?: false

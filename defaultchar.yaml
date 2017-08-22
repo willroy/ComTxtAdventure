@@ -1,7 +1,6 @@
 ---
 :name: NAME
 :health: '100'
-:items:
-  Flashlight:
-    :type: Tool
-    :use: Lights up dark areas
+items:
+  - Flashlight
+    
