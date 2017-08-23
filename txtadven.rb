@@ -36,37 +36,18 @@ class Character
         end
     end
     def unequip
-        item = ""
+        equipped = ""
         $charinfo.each do |key, value|
             if key.to_s() == "equiped"
-                if value == nil
-                    puts "You have nothing to unequip"
-                else
-                    item = value
-                    $charinfo["equiped"] == nil
-                    File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
-                end
+                equipped = $charinfo["equiped"]
+                $charinfo["equiped"] = nil 
+                File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
             end
         end
         $charinfo.each do |key, value|
             if key.to_s() == "items"
-                value.each do |k|
-                    if k == item
-                        $charinfo["items"] << item
-                        File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
-                    end
-                end
-            end
-        end
-    end
-    def ininventory(item)
-        $charinfo.each do |key, value|
-            if key.to_s() == "items"
-                value.each do |k|
-                    if k == item
-                        return true 
-                    end
-                end
+                $charinfo["items"] << equipped
+                File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml }
             end
         end
     end
@@ -82,7 +63,7 @@ class Character
         puts "Equipped:"
         $charinfo.each do |key, value|
             if key.to_s == "equiped"
-                puts "#{value}"
+                puts "#{value}" unless value == nil
             end
         end
     end
@@ -298,6 +279,7 @@ class Game
         @character.inventory() if command == "INVENTORY" or command == "INV"
         @character.examine() if command == "EXAMINE" or command == "EXAM"
         @character.equip() if command == "EQUIP" or command == "EQ" 
+        @character.unequip() if command == "UNEQUIP" or command == "UE"
         @quit = true if command == "QUIT" 
     end
     def commands
