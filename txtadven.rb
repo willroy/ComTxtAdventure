@@ -11,6 +11,35 @@ class Character
         File.open('characters.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
         puts "Hello #{@name}" #show to player the name
     end
+    def equip
+        puts "Which item? "
+        item = gets.chomp
+        hasitem = nil
+        $charinfo.each do |key, value|
+            if key.to_s() == "items"
+                value.each do |k|
+                    if k == item            
+                        puts "1"
+                        hasitem = true
+                        break
+                    elsif k != item
+                        hasitem = false
+                    end
+                end
+            elsif key.to_s() == "equiped"
+                if hasitem == true 
+                    if value != "none"
+                        puts "You must unequip first"
+                    elsif value == "none"
+                        value = item
+                        File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml }
+                    end
+                elsif hasitem = false
+                    puts "You can only equip items in your inventory"
+                end
+            end
+        end
+    end
     def inventory
         puts "Inventory:"
         $charinfo.each do |key, value|
@@ -18,6 +47,12 @@ class Character
                 value.each do |k, v|
                     puts "#{k}"
                 end
+            end
+        end
+        puts "Equipped:"
+        $charinfo.each do |key, value|
+            if key.to_s == "equiped"
+                puts "#{value}"
             end
         end
     end
@@ -36,7 +71,7 @@ class Character
                     value.each do |k|
                         if k == item
                             value.delete(item)
-                            return "true"
+                            return true 
                         end
                     end
                 end
@@ -221,13 +256,11 @@ class Game
         if command == "PUTDOWN"
             puts "Which Item? "
             item = gets.chomp
-            @character.putdown(item) 
-            if @character.putdown(item) == "true"
-                puts "You take the #{item} from the room"
+            if @character.putdown(item) == true 
+                puts "You put the #{item} down in the room"
                 @room.putinroom(item)
             else
                 puts "There is no #{item} in your inventory"
-                @room.putinroom(item)
             end
         end
         @room.move("NORTH") if command == "NORTH" 

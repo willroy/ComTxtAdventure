@@ -3,4 +3,5 @@
 :health: '100'
 items:
   - Flashlight
+:equiped: "None"
     

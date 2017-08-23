@@ -3,6 +3,7 @@
   :health: '100'
   items:
   - Flashlight
+  :equiped: None
 - 1:
     :name: Starting Room
     items:

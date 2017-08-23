@@ -1,7 +1,6 @@
 ---
-:name: lauren
+:name: NAME
 :health: '100'
 items:
 - Flashlight
-- Starting Sword
-- Gold
+:equiped: None
