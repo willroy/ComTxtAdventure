@@ -1,5 +1,8 @@
-finish tutorial
-check out line 214 + 39
+TODO:
+    Do interaction between character and enemy on entry of room
+    (This means battle time :P) THIS WILL BE A BIG AND AWESOME FEATURE
+    WITH LIKE BATTLE COMMANDS IN BATTLE MODE AND STUFF
+
 commands that work:
  - quit
  - north 
@@ -12,3 +15,7 @@ commands that work:
  - load
  - save
  - command
+ - pick up
+ - put down
+ - equip
+ - unequip

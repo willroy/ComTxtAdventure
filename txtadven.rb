@@ -98,6 +98,11 @@ class Character
                 end
             end
         end
+        $charinfo.each do |key, value|
+            if key.to_s() == "equiped"
+                gotitem = true if item == value
+            end
+        end
         if gotitem == true
             $items.each do |key, value|
                 if value[:name] == item
@@ -280,6 +285,7 @@ class Game
         @character.examine() if command == "EXAMINE" or command == "EXAM"
         @character.equip() if command == "EQUIP" or command == "EQ" 
         @character.unequip() if command == "UNEQUIP" or command == "UE"
+
         @quit = true if command == "QUIT" 
     end
     def commands
@@ -293,6 +299,7 @@ class Game
         puts " - Inventory / Inv (Lists Items On Character)"
         puts " - Examine / Exam (Lists Info About An Item In Inventory)"
         puts " - Equip / EQ (Equips Tool / Weapon Into Main Hand)"
+        puts " - Unequip / UE (Unequips Tool / Weapon Into Inventory)"
         puts " - Quit (Work it out)"
     end
     def save_game
@@ -338,6 +345,7 @@ class Game
         puts " - Inventory / Inv (Lists Items On Character)"
         puts " - Examine / Exam (Lists Info About An Item In Inventory)"
         puts " - Equip / EQ (Equips Tool / Weapon Into Main Hand)"
+        puts " - Unequip / UE (Unequips Tool / Weapon Into Inventory)"
         puts " - Quit (Work it out)\n\n"
     end
     def start_game
