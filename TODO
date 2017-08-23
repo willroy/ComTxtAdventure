@@ -1,5 +1,5 @@
 finish tutorial
-
+check out line 214 + 39
 commands that work:
  - quit
  - north 
@@ -11,3 +11,4 @@ commands that work:
  - examine # lists use and type 
  - load
  - save
+ - command

@@ -21,6 +21,28 @@ class Character
             end
         end
     end
+    def intoinv(item)
+        $charinfo.each do |key, value|
+            if key.to_s() == "items"
+                value << item
+                File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
+            end
+        end
+    end
+    def putdown(item)
+        $charinfo.each do |key, value|
+            if key.to_s() == "items"
+                if key.to_s() == "items"
+                    value.each do |k|
+                        if k == item
+                            value.delete(item)
+                            return "true"
+                        end
+                    end
+                end
+            end
+        end
+    end
     def examine
         puts "Which Item? "
         item = gets.chomp
@@ -68,7 +90,7 @@ class Room
                             if val.to_s() == goingto.to_s()
                                 v[:in?] = true
                                 $general_info["current_room"] = k
-                                File.open('general_info.yaml', 'w') {|f| f.write @general_info.to_yaml } 
+                                File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
                             end
                         end
                     end
@@ -79,8 +101,7 @@ class Room
         puts "You cannot go in this direction" if cango == "false"
     end
     def room_in_desc
-        roominfo = $roominfo
-        roominfo.each do |key, value|
+        $roominfo.each do |key, value|
             if key == $general_info["current_room"]
                 puts "You are in the #{value[:name]}"
                 value['items'].each {|k| puts "Items in room: #{k}"} unless value['items'] == nil
@@ -88,6 +109,28 @@ class Room
                 value[:exits].each do |k, v|
                     puts "There is the #{k} to the #{v}"
                 end
+            end
+        end
+    end
+    def pickup(item)
+        $roominfo.each do |key, value|
+            if key == $general_info["current_room"]
+                value['items'].each do |k|
+                    if k == item
+                        value['items'].delete(item)
+                        return true
+                    end
+                end
+            end
+        end
+    end
+    def putinroom(item)
+        $roominfo.each do |key, value| 
+            if key == $general_info["current_room"]
+                puts "key: #{key} value: #{value} item: #{item}"
+                value['items'] << item
+                File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
+
             end
         end
     end
@@ -114,6 +157,9 @@ class Game
             $roominfo = YAML::load_file('roomdefault.yaml')
             $items = YAML::load_file('itemlist.yaml')
             $npcs = YAML::load_file('npclist.yaml')
+
+            File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
+            File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
             @character = Character.new
             @character.change_name()
             @room = Room.new
@@ -162,8 +208,28 @@ class Game
         save_game() if command == "SAVE"
         load_game() if command == "LOAD"
         @room.room_in_desc() if command == "ROOM"
-        @room.pickup() if command == "PICKUP"
-        @room.putdown() if command == "PUTDOWN"
+        if command == "PICKUP"
+            puts "Which Item? "
+            item = gets.chomp
+            if @room.pickup(item) == true
+                puts "You put #{item} into your inventory."
+                @character.intoinv(item)
+            else
+                puts "There is no #{item} in this room"
+            end
+        end
+        if command == "PUTDOWN"
+            puts "Which Item? "
+            item = gets.chomp
+            @character.putdown(item) 
+            if @character.putdown(item) == "true"
+                puts "You take the #{item} from the room"
+                @room.putinroom(item)
+            else
+                puts "There is no #{item} in your inventory"
+                @room.putinroom(item)
+            end
+        end
         @room.move("NORTH") if command == "NORTH" 
         @room.move("SOUTH") if command == "SOUTH"
         @room.move("EAST") if command == "EAST"
@@ -172,6 +238,19 @@ class Game
         @character.examine() if command == "EXAMINE" or command == "EXAM"
         @character.equip() if command == "EQUIP" or command == "EQ" 
         @quit = true if command == "QUIT" 
+    end
+    def commands
+        puts "\n - Command (Lists Commands)"
+        puts " - Save (Saves Game State)"
+        puts " - Load (Loads Game State)"
+        puts " - Room (Lists Room Info)"
+        puts " - Pickup (Picks Up Room Items)"
+        puts " - Putdown (Putdown Inventory Items)"
+        puts " - North / East / South / West (Goes In The Desired Direction If Possible)"
+        puts " - Inventory / Inv (Lists Items On Character)"
+        puts " - Examine / Exam (Lists Info About An Item In Inventory)"
+        puts " - Equip / EQ (Equips Tool / Weapon Into Main Hand)"
+        puts " - Quit (Work it out)"
     end
     def save_game
         data = $charinfo, $roominfo, $general_info
@@ -200,11 +279,23 @@ class Game
         end
     end
     def tutorial
-        puts "\n\n To control your game you have to use commands to navigate"
-        puts "through the area and to interact with things and find out more"
-        puts "about your surroundings"
-        
-        puts "\n The first commands you will be taught is "
+        puts "\nThis is a dungeon text adventure game."    
+        puts "The aim of this game is to become the leader of the dungeon"
+        puts "and replace the current king of the dungeon."
+        puts "However the current king is hiding out and must be killed first."
+        puts "\nThe game requires use of commands to navigate through."
+        puts "These are the commands: "
+        puts "\n - Command (Lists Commands)"
+        puts " - Save (Saves Game State)"
+        puts " - Load (Loads Game State)"
+        puts " - Room (Lists Room Info)"
+        puts " - Pickup (Picks Up Room Items)"
+        puts " - Putdown (Putdown Inventory Items)"
+        puts " - North / East / South / West (Goes In The Desired Direction If Possible)"
+        puts " - Inventory / Inv (Lists Items On Character)"
+        puts " - Examine / Exam (Lists Info About An Item In Inventory)"
+        puts " - Equip / EQ (Equips Tool / Weapon Into Main Hand)"
+        puts " - Quit (Work it out)\n\n"
     end
     def start_game
         puts "You wake up in an empty room"

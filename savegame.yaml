@@ -10,11 +10,11 @@
     npcs: 
     :exits:
       Hallway: NORTH
-    :in?: false
+    :in?: true
   2:
     :name: Hallway
     items:
-    - Potion
+    - Heal Potion
     npcs:
     - Goblin
     :exits:
@@ -31,7 +31,7 @@
       Hallway: EAST
       Treasure Room: WEST
       Hallway 2: SOUTH
-    :in?: true
+    :in?: false
   4:
     :name: Treasure Room
     items:
@@ -47,4 +47,4 @@
     :exits:
       Throne Room: NORTH
     :in?: false
-- current_room: 3
+- current_room: 1

@@ -10,7 +10,7 @@
 2:
   :name: Hallway
   items:
-    - Potion
+    - Heal Potion
   npcs:
     - Goblin
   :exits:
