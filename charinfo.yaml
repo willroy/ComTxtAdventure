@@ -1,6 +1,5 @@
 ---
-:name: NAME
+:name: BOB
 :health: '100'
-items:
-- Flashlight
-:equiped: None
+items: []
+equiped: Flashlight

@@ -14,28 +14,58 @@ class Character
     def equip
         puts "Which item? "
         item = gets.chomp
-        hasitem = nil
+        ininv = false
         $charinfo.each do |key, value|
             if key.to_s() == "items"
                 value.each do |k|
-                    if k == item            
-                        puts "1"
-                        hasitem = true
-                        break
-                    elsif k != item
-                        hasitem = false
+                    if k == item
+                        $charinfo["items"].delete(item)
+                        File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
+                        ininv = true 
                     end
                 end
-            elsif key.to_s() == "equiped"
-                if hasitem == true 
-                    if value != "none"
-                        puts "You must unequip first"
-                    elsif value == "none"
-                        value = item
-                        File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml }
+            end
+        end
+        $charinfo.each do |key, value|
+            if key.to_s() == "equiped"
+                if value == nil and ininv == true
+                    $charinfo["equiped"] = item
+                    File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
+                end
+            end
+        end
+    end
+    def unequip
+        item = ""
+        $charinfo.each do |key, value|
+            if key.to_s() == "equiped"
+                if value == nil
+                    puts "You have nothing to unequip"
+                else
+                    item = value
+                    $charinfo["equiped"] == nil
+                    File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
+                end
+            end
+        end
+        $charinfo.each do |key, value|
+            if key.to_s() == "items"
+                value.each do |k|
+                    if k == item
+                        $charinfo["items"] << item
+                        File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
                     end
-                elsif hasitem = false
-                    puts "You can only equip items in your inventory"
+                end
+            end
+        end
+    end
+    def ininventory(item)
+        $charinfo.each do |key, value|
+            if key.to_s() == "items"
+                value.each do |k|
+                    if k == item
+                        return true 
+                    end
                 end
             end
         end
@@ -67,12 +97,10 @@ class Character
     def putdown(item)
         $charinfo.each do |key, value|
             if key.to_s() == "items"
-                if key.to_s() == "items"
-                    value.each do |k|
-                        if k == item
-                            value.delete(item)
-                            return true 
-                        end
+                value.each do |k|
+                    if k == item
+                        value.delete(item)
+                        return true 
                     end
                 end
             end
