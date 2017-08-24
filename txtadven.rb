@@ -249,32 +249,26 @@ class Game
 	def battle_loop
 		puts "Enemy to battle: "
 		enemy = gets.chomp
+		running = false
 		$roominfo.each do |key, value|
 			if key == $general_info["current_room"] 
-				$roominfo["npcs"].each do |k|
+				puts "#{key}"
+				puts "#{value}"
+				puts "#{$roominfo["npcs"]}"
+				value["npcs"].each do |k|
 					if k == enemy
 						puts "You engage in battle with #{enemy}"
-						running == true
+						running = true
 					else
 						puts "Cannot attack an enemy that is not in this room"
 					end	
 				end
 			end
 		end
-		$npcs.each do |key, value|
-			if value[:name] == enemy
-				$roominfo["npcs"][enemy] = value
-			else
-				puts "Also this enemy does not exist "
-			end
-		end
 		while running == true do 
-			return false if $charinfo["health"] <= 0
-			return true if $roominfo.dig("npcs", enemy, :health) == 0
-
 			print "=> "
 			begin
-				command = get.chomp.upcase
+				command = gets.chomp.upcase
 			rescue Exception => e
 				puts "\nQuitting... #{e.message}"
 				abort
@@ -284,6 +278,13 @@ class Game
 			block() if command == "BLOCK"
 			use() if command == "USE"
 			@character.inventory() if command == "INVENTORY" or command == "INV"
+			puts $charinfo[:health]
+			puts $roominfo.dig("npcs", enemy)
+			puts $roominfo["npcs"][enemy]["health"]
+			puts $roominfo["npcs"][enemy]
+			puts $roominfo.dig("npcs", enemy, :health) 
+			return false if $charinfo[:health].to_i() < 0 or $charinfo["health"].to_i() == 0
+			return true if $roominfo.dig("npcs", enemy, :health) == 0 or $roominfo.dig("npcs", enemy, :health) < 0
 		end
 	end
     def command_test

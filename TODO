@@ -19,3 +19,6 @@ commands that work:
  - put down
  - equip
  - unequip
+ - battle
+    - need to find out how to access enemy health in 
+      current room with the enemy typed

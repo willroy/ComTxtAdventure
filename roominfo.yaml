@@ -12,7 +12,9 @@
   items:
   - Heal Potion
   npcs:
-  - Goblin
+  :name: Goblin
+  :type: enemy
+  :health: 50
   :exits:
     Throne Room: WEST
     Starting Room: SOUTH
