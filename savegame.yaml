@@ -2,15 +2,15 @@
 - :name: BOB
   :health: '100'
   items:
-  - Starting Sword
-  equiped: Flashlight
+  - Flashlight
+  equiped: Starting Sword
 - 1:
     :name: Starting Room
     items: []
     npcs: 
     :exits:
       Hallway: NORTH
-    :in?: true
+    :in?: false
   2:
     :name: Hallway
     items:
@@ -20,7 +20,7 @@
     :exits:
       Throne Room: WEST
       Starting Room: SOUTH
-    :in?: false
+    :in?: true
   3:
     :name: Throne Room
     items:
@@ -47,4 +47,4 @@
     :exits:
       Throne Room: NORTH
     :in?: false
-- current_room: 1
+- current_room: 2

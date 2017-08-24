@@ -2,5 +2,5 @@
 :name: BOB
 :health: '100'
 items:
-- Starting Sword
-equiped: Flashlight
+- Flashlight
+equiped: Starting Sword

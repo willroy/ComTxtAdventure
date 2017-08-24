@@ -190,6 +190,7 @@ class Game
         @character
         @room
         @quit = false
+		@battle = false
         $roominfo
         $general_info
         $charinfo
@@ -245,7 +246,47 @@ class Game
             abort if @quit == true
         end
     end
-    def command_test()
+	def battle_loop
+		puts "Enemy to battle: "
+		enemy = gets.chomp
+		$roominfo.each do |key, value|
+			if key == $general_info["current_room"] 
+				$roominfo["npcs"].each do |k|
+					if k == enemy
+						puts "You engage in battle with #{enemy}"
+						running == true
+					else
+						puts "Cannot attack an enemy that is not in this room"
+					end	
+				end
+			end
+		end
+		$npcs.each do |key, value|
+			if value[:name] == enemy
+				$roominfo["npcs"][enemy] = value
+			else
+				puts "Also this enemy does not exist "
+			end
+		end
+		while running == true do 
+			return false if $charinfo["health"] <= 0
+			return true if $roominfo.dig("npcs", enemy, :health) == 0
+
+			print "=> "
+			begin
+				command = get.chomp.upcase
+			rescue Exception => e
+				puts "\nQuitting... #{e.message}"
+				abort
+			end
+			commandbattle() if command == "COMMAND"
+			attack() if command == "ATTACK"
+			block() if command == "BLOCK"
+			use() if command == "USE"
+			@character.inventory() if command == "INVENTORY" or command == "INV"
+		end
+	end
+    def command_test
         print "=> "
         begin
             command = gets.chomp.upcase
@@ -256,7 +297,7 @@ class Game
         commands() if command == "COMMAND"
         save_game() if command == "SAVE"
         load_game() if command == "LOAD"
-        @room.room_in_desc() if command == "ROOM"
+		battle_loop() if command == "BATTLE"
         if command == "PICKUP"
             puts "Which Item? "
             item = gets.chomp
@@ -277,6 +318,7 @@ class Game
                 puts "There is no #{item} in your inventory"
             end
         end
+        @room.room_in_desc() if command == "ROOM"
         @room.move("NORTH") if command == "NORTH" 
         @room.move("SOUTH") if command == "SOUTH"
         @room.move("EAST") if command == "EAST"
@@ -301,6 +343,13 @@ class Game
         puts " - Equip / EQ (Equips Tool / Weapon Into Main Hand)"
         puts " - Unequip / UE (Unequips Tool / Weapon Into Inventory)"
         puts " - Quit (Work it out)"
+    end
+    def commandbattle
+        puts "\n - Battle Commands (List Battle Commands)"
+        puts " - Attack (Attacks The Enemyy)"
+        puts " - Block (Blocks An Enemy Attack To Reduce Damage)"
+        puts " - Use (Uses An Item In Your Inventory)"
+        puts " - Inventory / Inv (Lists Items On Character)"
     end
     def save_game
         data = $charinfo, $roominfo, $general_info
