@@ -18,7 +18,6 @@ class Character
 		$charinfo["items"].each {|k| ininv = true if k == item}
 		$charinfo["items"].delete(item) if ininv == true
 		$charinfo["equiped"] = item if $charinfo["equiped"] == nil and ininv == true
-        File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
     end
     def unequip
         equipped = ""
@@ -28,7 +27,6 @@ class Character
 			equipped = $charinfo["equiped"]
 			$charinfo["equiped"] = nil
 			$charinfo["items"] << equipped
-			File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml }
 		end
     end
     def inventory
@@ -39,7 +37,6 @@ class Character
     end
     def intoinv(item)
 		$charinfo["items"] << item
-		File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml }
     end
     def putdown(item)
 		return true if $charinfo["items"].each {|k| $charinfo["items"].delete(item) if k == item}
@@ -68,10 +65,10 @@ class Room
 		$roominfo[$general_info["current_room"]][:exits].each do |k, v|
 			if v == dir 
 				goingto = k
-				cango = "true"
+				cango = true
 				break
 			end
-			cango = "false"
+			cango = false
 		end
 		$roominfo.each do |k, v|
 			v.each do |ke, val|
@@ -85,25 +82,27 @@ class Room
         end
         puts "You cannot go in this direction" if cango == false
 		puts "You go #{dir}" if cango == true
-		File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
     end
     def room_in_desc
 		puts "You are in the #{$roominfo[$general_info["current_room"]][:name]}"
 		puts "Items in room: "
 		$roominfo[$general_info["current_room"]]["items"].each {|k| puts k}
 		puts "Npcs in room: "
-		$roominfo[$general_info["current_room"]]["npcs"].each do |k, v| 
-			k.each {|ke, val| puts val[:name]}
+		$roominfo[$general_info["current_room"]].fetch("npcs", {}).each do |k, v| 
+			puts v[:name]
 		end
 		$roominfo[$general_info["current_room"]][:exits].each {|k, v| puts "There is the #{k} to the #{v}"}
     end
     def pickup(item)
-		return true if $roominfo[$general_info["current_room"]]["items"].each {|k| $roominfo[$general_info["current_room"]]["items"].delete(item) if k == item}
-        File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
+		items = $roominfo[$general_info["current_room"]]["items"]
+		exists = items.include? item
+		if exists
+			items.delete item
+		end
+		exists
     end
     def putinroom(item)
 		$roominfo[$general_info["current_room"]]["items"] << item
-        File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
     end
 end
 
@@ -132,6 +131,7 @@ class Game
 
             File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
             File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
+			File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
             @character = Character.new
             @character.change_name()
             @room = Room.new
@@ -164,14 +164,21 @@ class Game
     def game_loop
         while true do
             command_test()
+			File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
+			File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
+        	File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
             abort if @quit == true
         end
     end
 	def battle_loop
+		File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
+		File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
+		File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
 		puts "Enemy to battle: "
 		enemy = gets.chomp
 		running = false
 		enemyid = nil
+		puts $roominfo[$general_info["current_room"]]
 		$roominfo[$general_info["current_room"]]["npcs"].each do |k|
 			k.each do |ke, val|
 				if val[:name] == enemy
@@ -196,7 +203,8 @@ class Game
 			killenemy() if command == "KE"
 			killchar() if command == "KC"
 			@character.inventory() if command == "INVENTORY" or command == "INV"
-			$roominfo[$general_info["current_room"]]["npcs"].each {|enemies| return true if enemies[enemyid][:health] <= 0}
+			puts enemyid
+			return true if  $roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] <= 0
 			puts $charinfo[:health].to_i()
 		   	return false if $charinfo[:health].to_i() <= 0 
 		end
@@ -206,7 +214,6 @@ class Game
 	end
 	def killchar
 		$charinfo[:health] = 0
-        File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
 		puts "DONE"
 	end
 	def attack
@@ -228,7 +235,6 @@ class Game
 	end
 	def restorehealth
 		$charinfo[:health] = 100
-        File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
 	end
     def command_test
         print "=> "

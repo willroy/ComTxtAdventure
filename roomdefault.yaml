@@ -3,7 +3,6 @@
   :name: Starting Room
   items:
     - Starting Sword      
-  npcs:
   :exits:
     Hallway: NORTH
   :in?: true
@@ -12,8 +11,8 @@
   items:
     - Heal Potion
   npcs:
-    - 1:
-        :name: Goblin
+    1:
+        :name: Gllloblin
         :type: enemy
         :health: 50
   :exits:
@@ -25,7 +24,7 @@
   items:
     - Gold
   npcs:
-    - 1:
+    1:
         :name: Skeleton
         :type: enemy
         :health: 60
@@ -38,14 +37,12 @@
   :name: Treasure Room
   items:
     - Gold
-  npcs:
   :exits:
     Throne Room: EAST
   :in?: false
 5:
   :name: Hallway 2
   items:
-  npcs:
   :exits:
     Throne Room: NORTH
   :in?: false

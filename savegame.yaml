@@ -8,7 +8,6 @@
 - 1:
     :name: Starting Room
     items: []
-    npcs: 
     :exits:
       Hallway: NORTH
     :in?: false
@@ -17,8 +16,8 @@
     items:
     - Heal Potion
     npcs:
-    - 1:
-        :name: Goblin
+     1:
+        :name: Gooooblin
         :type: enemy
         :health: 50
     :exits:
@@ -29,7 +28,7 @@
     :name: Throne Room
     items: []
     npcs:
-    - 1:
+     1:
         :name: Skeleton
         :type: enemy
         :health: 60

@@ -3,6 +3,4 @@
 :health: '100'
 items:
 - Flashlight
-- Gold
-- Heal Potion
-equiped: Starting Sword
+equiped: 
