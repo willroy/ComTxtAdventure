@@ -15,100 +15,45 @@ class Character
         puts "Which item? "
         item = gets.chomp
         ininv = false
-        $charinfo.each do |key, value|
-            if key.to_s() == "items"
-                value.each do |k|
-                    if k == item
-                        $charinfo["items"].delete(item)
-                        File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
-                        ininv = true 
-                    end
-                end
-            end
-        end
-        $charinfo.each do |key, value|
-            if key.to_s() == "equiped"
-                if value == nil and ininv == true
-                    $charinfo["equiped"] = item
-                    File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
-                end
-            end
-        end
+		$charinfo["items"].each {|k| ininv = true if k == item}
+		$charinfo["items"].delete(item) if ininv == true
+		$charinfo["equiped"] = item if $charinfo["equiped"] == nil and ininv == true
+        File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
     end
     def unequip
         equipped = ""
-        $charinfo.each do |key, value|
-            if key.to_s() == "equiped"
-                equipped = $charinfo["equiped"]
-                $charinfo["equiped"] = nil 
-                File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
-            end
-        end
-        $charinfo.each do |key, value|
-            if key.to_s() == "items"
-                $charinfo["items"] << equipped
-                File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml }
-            end
-        end
+		if $charinfo == nil
+			puts "You have nothing to unequip"
+		else
+			equipped = $charinfo["equiped"]
+			$charinfo["equiped"] = nil
+			$charinfo["items"] << equipped
+			File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml }
+		end
     end
     def inventory
         puts "Inventory:"
-        $charinfo.each do |key, value|
-            if key.to_s() == "items"
-                value.each do |k, v|
-                    puts "#{k}"
-                end
-            end
-        end
+		$charinfo["items"].each {|k| puts k}
         puts "Equipped:"
-        $charinfo.each do |key, value|
-            if key.to_s == "equiped"
-                puts "#{value}" unless value == nil
-            end
-        end
+		puts $charinfo["equiped"]
     end
     def intoinv(item)
-        $charinfo.each do |key, value|
-            if key.to_s() == "items"
-                value << item
-                File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
-            end
-        end
+		$charinfo["items"] << item
+		File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml }
     end
     def putdown(item)
-        $charinfo.each do |key, value|
-            if key.to_s() == "items"
-                value.each do |k|
-                    if k == item
-                        value.delete(item)
-                        return true 
-                    end
-                end
-            end
-        end
+		return true if $charinfo["items"].each {|k| $charinfo["items"].delete(item) if k == item}
     end
     def examine
         puts "Which Item? "
         item = gets.chomp
         gotitem = false
-        $charinfo.each do |key, value|
-            if key.to_s() == "items"
-                value.each do |v|
-                    gotitem = true if item == v
-                end
-            end
-        end
-        $charinfo.each do |key, value|
-            if key.to_s() == "equiped"
-                gotitem = true if item == value
-            end
-        end
-        if gotitem == true
-            $items.each do |key, value|
-                if value[:name] == item
-                    puts "#{value[:name]} is type #{value[:type]} and it:\n #{value[:use]}"
-                end
-            end
+		$charinfo["items"].each {|v| gotitem = true if item == v}
+		gotitem = true if item == $charinfo["equiped"]
+        if gotitem == true 
+			$items.each do |key, value|
+				puts "#{value[:name]} is type #{value[:type]} and it:\n #{value[:use]}" if value[:name] == item
+			end
         elsif gotitem == false
             puts "You cannot examine an item you do not have"
         end
@@ -118,70 +63,47 @@ end
 class Room
     def move(dir)
         goingto = ""
-        breakk = false
         cango = "maybe"
-        $roominfo.each do |key, value|
-            if key == $general_info["current_room"]
-                value[:in?] = false
-                value[:exits].each do |k, v|
-                    if v == dir 
-                        goingto = k
-                        puts "You go #{dir}"
-                        cango = "true"
-                        break
-                    end
-                    cango = "false"
-                end
-                breakk = true
-                $roominfo.each do |k, v|
-                    v.each do |ke, val|
-                        if ke.to_s() == "name" 
-                            if val.to_s() == goingto.to_s()
-                                v[:in?] = true
-                                $general_info["current_room"] = k
-                                File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
-                            end
-                        end
-                    end
-                end
-            end
-            break if breakk == true      
+		$roominfo[$general_info["current_room"]][:in?] = false
+		$roominfo[$general_info["current_room"]][:exits].each do |k, v|
+			if v == dir 
+				goingto = k
+				cango = "true"
+				break
+			end
+			cango = "false"
+		end
+		$roominfo.each do |k, v|
+			v.each do |ke, val|
+				if ke.to_s() == "name" 
+					if val.to_s() == goingto.to_s()
+						v[:in?] = true
+						$general_info["current_room"] = k
+					end
+				end
+			end
         end
-        puts "You cannot go in this direction" if cango == "false"
+        puts "You cannot go in this direction" if cango == false
+		puts "You go #{dir}" if cango == true
+		File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
     end
     def room_in_desc
-        $roominfo.each do |key, value|
-            if key == $general_info["current_room"]
-                puts "You are in the #{value[:name]}"
-                value['items'].each {|k| puts "Items in room: #{k}"} unless value['items'] == nil
-                value['npcs'].each {|k| puts "Npcs in room: #{k}"} unless value['npcs'] == nil 
-                value[:exits].each do |k, v|
-                    puts "There is the #{k} to the #{v}"
-                end
-            end
-        end
+		puts "You are in the #{$roominfo[$general_info["current_room"]][:name]}"
+		puts "Items in room: "
+		$roominfo[$general_info["current_room"]]["items"].each {|k| puts k}
+		puts "Npcs in room: "
+		$roominfo[$general_info["current_room"]]["npcs"].each do |k, v| 
+			k.each {|ke, val| puts val[:name]}
+		end
+		$roominfo[$general_info["current_room"]][:exits].each {|k, v| puts "There is the #{k} to the #{v}"}
     end
     def pickup(item)
-        $roominfo.each do |key, value|
-            if key == $general_info["current_room"]
-                value['items'].each do |k|
-                    if k == item
-                        value['items'].delete(item)
-                        return true
-                    end
-                end
-            end
-        end
+		return true if $roominfo[$general_info["current_room"]]["items"].each {|k| $roominfo[$general_info["current_room"]]["items"].delete(item) if k == item}
+        File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
     end
     def putinroom(item)
-        $roominfo.each do |key, value| 
-            if key == $general_info["current_room"]
-                puts "key: #{key} value: #{value} item: #{item}"
-                value['items'] << item
-                File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
-
-            end
-        end
+		$roominfo[$general_info["current_room"]]["items"] << item
+        File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
     end
 end
 
@@ -220,7 +142,6 @@ class Game
             $npcs = YAML::load_file('npclist.yaml')
             count = 1
             @savegame.each do |key, value|
-                #puts key
                 if count == 1
                     $charinfo = key 
                 elsif count == 2
@@ -250,21 +171,16 @@ class Game
 		puts "Enemy to battle: "
 		enemy = gets.chomp
 		running = false
-		$roominfo.each do |key, value|
-			if key == $general_info["current_room"] 
-				puts "#{key}"
-				puts "#{value}"
-				puts "#{$roominfo["npcs"]}"
-				value["npcs"].each do |k|
-					if k == enemy
-						puts "You engage in battle with #{enemy}"
-						running = true
-					else
-						puts "Cannot attack an enemy that is not in this room"
-					end	
+		enemyid = nil
+		$roominfo[$general_info["current_room"]]["npcs"].each do |k|
+			k.each do |ke, val|
+				if val[:name] == enemy
+					puts "You engage in battle with #{enemy}"
+					enemyid = ke
+					running = true
 				end
 			end
-		end
+		end	
 		while running == true do 
 			print "=> "
 			begin
@@ -277,15 +193,42 @@ class Game
 			attack() if command == "ATTACK"
 			block() if command == "BLOCK"
 			use() if command == "USE"
+			killenemy() if command == "KE"
+			killchar() if command == "KC"
 			@character.inventory() if command == "INVENTORY" or command == "INV"
-			puts $charinfo[:health]
-			puts $roominfo.dig("npcs", enemy)
-			puts $roominfo["npcs"][enemy]["health"]
-			puts $roominfo["npcs"][enemy]
-			puts $roominfo.dig("npcs", enemy, :health) 
-			return false if $charinfo[:health].to_i() < 0 or $charinfo["health"].to_i() == 0
-			return true if $roominfo.dig("npcs", enemy, :health) == 0 or $roominfo.dig("npcs", enemy, :health) < 0
+			$roominfo[$general_info["current_room"]]["npcs"].each {|enemies| return true if enemies[enemyid][:health] <= 0}
+			puts $charinfo[:health].to_i()
+		   	return false if $charinfo[:health].to_i() <= 0 
 		end
+	end
+	def killenemy
+		$roominfo[$general_info["current_room"]]["npcs"].each {|enemies| }
+	end
+	def killchar
+		$charinfo[:health] = 0
+        File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
+		puts "DONE"
+	end
+	def attack
+		
+	end
+	def block
+	
+	end
+	def use
+		puts "Which item? "
+        item = gets.chomp
+		itemid = nil
+        ininv = false
+		usable = false
+		$charinfo["items"].each {|k| ininv = true if k == item}
+		$items.each {|k, v| itemid = k if v[:name] == item}
+		usable = true if $items[itemid][:type] == "consumable"
+		puts "Usable? #{usable} InInv? #{ininv} ItemID: #{itemid}"
+	end
+	def restorehealth
+		$charinfo[:health] = 100
+        File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
 	end
     def command_test
         print "=> "
@@ -298,7 +241,20 @@ class Game
         commands() if command == "COMMAND"
         save_game() if command == "SAVE"
         load_game() if command == "LOAD"
-		battle_loop() if command == "BATTLE"
+		restorehealth() if command == "RH"
+		if command == "BATTLE"
+			if battle_loop() == false
+				puts "You have died! Start Again or quit? (S/Q) "
+				choice = gets.chomp.upcase
+				if choice == "Q"
+					@quit = true
+				elsif choice == "S"
+					
+				else 
+					@quit = true
+				end
+			end
+		end
         if command == "PICKUP"
             puts "Which Item? "
             item = gets.chomp
@@ -346,7 +302,7 @@ class Game
         puts " - Quit (Work it out)"
     end
     def commandbattle
-        puts "\n - Battle Commands (List Battle Commands)"
+        puts "\n - Command (List Battle Commands)"
         puts " - Attack (Attacks The Enemyy)"
         puts " - Block (Blocks An Enemy Attack To Reduce Damage)"
         puts " - Use (Uses An Item In Your Inventory)"

@@ -3,6 +3,7 @@
   :health: '100'
   items:
   - Flashlight
+  - Gold
   equiped: Starting Sword
 - 1:
     :name: Starting Room
@@ -16,17 +17,22 @@
     items:
     - Heal Potion
     npcs:
-    - Goblin
+    - 1:
+        :name: Goblin
+        :type: enemy
+        :health: 50
     :exits:
       Throne Room: WEST
       Starting Room: SOUTH
     :in?: true
   3:
     :name: Throne Room
-    items:
-    - Gold
+    items: []
     npcs:
-    - Skeleton
+    - 1:
+        :name: Skeleton
+        :type: enemy
+        :health: 60
     :exits:
       Hallway: EAST
       Treasure Room: WEST

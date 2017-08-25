@@ -1,30 +1,32 @@
 ---
 1:
   :name: Starting Room
-  items:
-  - Starting Sword
+  items: []
   npcs: 
   :exits:
     Hallway: NORTH
-  :in?: true
+  :in?: false
 2:
   :name: Hallway
   items:
-  - Heal Potion
+  - Flashlight
   npcs:
-  :name: Goblin
-  :type: enemy
-  :health: 50
+  - 1:
+      :name: Goblin
+      :type: enemy
+      :health: 50
   :exits:
     Throne Room: WEST
     Starting Room: SOUTH
-  :in?: false
+  :in?: true
 3:
   :name: Throne Room
-  items:
-  - Gold
+  items: []
   npcs:
-  - Skeleton
+  - 1:
+      :name: Skeleton
+      :type: enemy
+      :health: 60
   :exits:
     Hallway: EAST
     Treasure Room: WEST
