@@ -12,7 +12,7 @@
     - Heal Potion
   npcs:
     1:
-        :name: Gllloblin
+        :name: Goblin
         :type: enemy
         :health: 50
   :exits:

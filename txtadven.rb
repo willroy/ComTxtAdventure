@@ -171,24 +171,28 @@ class Game
         end
     end
 	def battle_loop
-		File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
-		File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
-		File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
 		puts "Enemy to battle: "
 		enemy = gets.chomp
 		running = false
 		enemyid = nil
-		puts $roominfo[$general_info["current_room"]]
-		$roominfo[$general_info["current_room"]]["npcs"].each do |k|
-			k.each do |ke, val|
-				if val[:name] == enemy
-					puts "You engage in battle with #{enemy}"
-					enemyid = ke
-					running = true
-				end
+		if $roominfo[$general_info["current_room"]]["npcs"] == nil
+			puts "No enemies in this room"
+			return "no_enemy"
+		end
+		$roominfo[$general_info["current_room"]]["npcs"].each do |key, value|
+			if value[:name] == enemy
+				puts "You engage in battle with #{enemy}"
+				enemyid = key
+				running = true
 			end
 		end	
+		if running == false
+			puts "No #{enemy} in this room"
+		end
 		while running == true do 
+			File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
+			File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
+			File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
 			print "=> "
 			begin
 				command = gets.chomp.upcase
@@ -200,17 +204,19 @@ class Game
 			attack() if command == "ATTACK"
 			block() if command == "BLOCK"
 			use() if command == "USE"
-			killenemy() if command == "KE"
+			killenemy(enemyid) if command == "KE"
 			killchar() if command == "KC"
 			@character.inventory() if command == "INVENTORY" or command == "INV"
-			puts enemyid
-			return true if  $roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] <= 0
-			puts $charinfo[:health].to_i()
+			if  $roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] <= 0
+				
+				return true
+			end
 		   	return false if $charinfo[:health].to_i() <= 0 
 		end
 	end
-	def killenemy
-		$roominfo[$general_info["current_room"]]["npcs"].each {|enemies| }
+	def killenemy(enemyid)
+		$roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] = 0
+		puts "DONE"
 	end
 	def killchar
 		$charinfo[:health] = 0
@@ -249,16 +255,13 @@ class Game
         load_game() if command == "LOAD"
 		restorehealth() if command == "RH"
 		if command == "BATTLE"
-			if battle_loop() == false
-				puts "You have died! Start Again or quit? (S/Q) "
-				choice = gets.chomp.upcase
-				if choice == "Q"
-					@quit = true
-				elsif choice == "S"
-					
-				else 
-					@quit = true
-				end
+			value = battle_loop()
+			if value == false
+				died()
+			elsif value == true
+				puts "You beat the enemy!"
+			else
+
 			end
 		end
         if command == "PICKUP"
@@ -293,6 +296,10 @@ class Game
 
         @quit = true if command == "QUIT" 
     end
+	def died	
+		puts "You have died! Quitting..."
+		@quit = true
+	end
     def commands
         puts "\n - Command (Lists Commands)"
         puts " - Save (Saves Game State)"
@@ -318,11 +325,7 @@ class Game
         data = $charinfo, $roominfo, $general_info
         File.open('savegame.yaml', 'w') {|f| f.write data.to_yaml } 
         @savegame = YAML::load(File.open('savegame.yaml'))
-        puts "SAVED GAME!"
-        #@savegame.each do |key, value|
-        #    puts "#{key} #{value}"
-        #    puts ""
-        #end
+        puts "SAVED GAME!"  
     end
     def load_game 
         puts "\nYou travel back to your last save...\n\n"

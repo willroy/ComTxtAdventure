@@ -5,14 +5,14 @@
   - Starting Sword
   :exits:
     Hallway: NORTH
-  :in?: false
+  :in?: true
 2:
   :name: Hallway
   items:
   - Heal Potion
   npcs:
     1:
-      :name: Gllloblin
+      :name: Goblin
       :type: enemy
       :health: 50
   :exits:
@@ -39,7 +39,7 @@
   - Gold
   :exits:
     Throne Room: EAST
-  :in?: true
+  :in?: false
 5:
   :name: Hallway 2
   items: 

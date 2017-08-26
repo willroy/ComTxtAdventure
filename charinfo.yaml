@@ -1,5 +1,5 @@
 ---
-:name: BOB
+:name: NAME
 :health: '100'
 items:
 - Flashlight
