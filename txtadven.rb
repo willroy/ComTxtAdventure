@@ -31,7 +31,11 @@ class Character
     end
     def inventory
         puts "Inventory:"
-		$charinfo["items"].each {|k| puts k}
+		itemdupes = $charinfo["items"].inject(Hash.new(0)) {|n, v| n[v] += 1; n }
+		itemdupes.to_a.each do |value, count| 
+			puts "#{value} [#{count}]" if count > 1
+			puts value if count == 1
+		end
         puts "Equipped:"
 		puts $charinfo["equiped"]
     end
