@@ -208,7 +208,7 @@ class Game
 			killchar() if command == "KC"
 			@character.inventory() if command == "INVENTORY" or command == "INV"
 			if  $roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] <= 0
-				
+				$roominfo[$general_info["current_room"]]["npcs"].delete(enemyid)
 				return true
 			end
 		   	return false if $charinfo[:health].to_i() <= 0 

@@ -5,20 +5,16 @@
   - Starting Sword
   :exits:
     Hallway: NORTH
-  :in?: true
+  :in?: false
 2:
   :name: Hallway
   items:
   - Heal Potion
-  npcs:
-    1:
-      :name: Goblin
-      :type: enemy
-      :health: 50
+  npcs: {}
   :exits:
     Throne Room: WEST
     Starting Room: SOUTH
-  :in?: false
+  :in?: true
 3:
   :name: Throne Room
   items:
