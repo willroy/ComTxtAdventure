@@ -220,8 +220,8 @@ class Game
             attk(enemyid) if command == "ATTACK" or command == "A"
             block() if command == "BLOCK" or command == "B"
             use() if command == "USE" or command == "U"
-            killenemy(enemyid) if command == "KE"
-            killchar() if command == "KC" and 
+            killenemy(enemyid) if command == "KE" and debug = true
+            killchar() if command == "KC" and debug = true 
             @character.inventory() if command == "INVENTORY" or command == "INV"
             if  $roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] <= 0
                 $roominfo[$general_info["current_room"]]["npcs"].delete(enemyid)
