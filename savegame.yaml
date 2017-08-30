@@ -1,6 +1,6 @@
 ---
 - :name: BOB
-  :health: '100'
+  :health: 100
   :power: 10
   items:
   - Flashlight
@@ -21,6 +21,7 @@
         :name: Goblin
         :type: enemy
         :health: 50
+        :power: 5
     :exits:
       Throne Room: WEST
       Starting Room: SOUTH
@@ -34,6 +35,7 @@
         :name: Skeleton
         :type: enemy
         :health: 60
+        :power: 6
     :exits:
       Hallway: EAST
       Treasure Room: WEST

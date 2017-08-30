@@ -15,6 +15,7 @@
         :name: Goblin
         :type: enemy
         :health: 50
+        :power: 5
   :exits:
     Throne Room: WEST
     Starting Room: SOUTH
@@ -28,6 +29,7 @@
         :name: Skeleton
         :type: enemy
         :health: 60
+        :power: 6
   :exits:
     Hallway: EAST
     Treasure Room: WEST

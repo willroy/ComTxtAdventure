@@ -178,15 +178,16 @@ class Game
         end
     end
     def game_loop
+		debug = false
         while true do
-            command_test()
+            command_test(debug)
             File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
             File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
             File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
             abort if @quit == true
         end
     end
-    def battle_loop
+    def battle_loop(debug)
         $texthandler.write("Enemy to battle: ")
         enemy = gets.chomp
         running = false
@@ -216,19 +217,23 @@ class Game
                 abort
             end
             commandbattle() if command == "COMMAND" 
-            attack(enemyid) if command == "ATTACK" or command == "A"
+            attk(enemyid) if command == "ATTACK" or command == "A"
             block() if command == "BLOCK" or command == "B"
             use() if command == "USE" or command == "U"
             killenemy(enemyid) if command == "KE"
-            killchar() if command == "KC"
+            killchar() if command == "KC" and 
             @character.inventory() if command == "INVENTORY" or command == "INV"
             if  $roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] <= 0
                 $roominfo[$general_info["current_room"]]["npcs"].delete(enemyid)
                 return true
             end
             return false if $charinfo[:health].to_i() <= 0 
+			enemy_attk(enemyid)
         end
     end
+	def enemy_attk(enemyid)
+		$charinfo[:health] -= rand($roominfo[$general_info["current_room"]]["npcs"][enemyid][:power]-2..$roominfo[$general_info["current_room"]]["npcs"][enemyid][:power]+2)
+	end	
     def killenemy(enemyid)
         $roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] = 0
         $texthandler.write("Enemy Health Set To 0")
@@ -237,8 +242,8 @@ class Game
         $charinfo[:health] = 0
         $texthandler.write("Player Health Set To 0")
     end
-    def attack(enemyid)
-        $roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] -= $charinfo[:power] 
+    def attk(enemyid)
+		$roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] -= rand($charinfo[:power]-2..$charinfo[:power]+2)
 		$texthandler.write("Your Health: #{$charinfo[:health]} Enemy Health: #{$roominfo[$general_info["current_room"]]["npcs"][enemyid][:health]}")
     end
     def block
@@ -256,21 +261,26 @@ class Game
         $texthandler.write("Usable? #{usable} InInv? #{ininv} ItemID: #{itemid}")
     end
     def restorehealth
+		$texthandler.write("RESTORED HEALTH")
         $charinfo[:health] = 100
     end
-    def command_test
+    def command_test(debug)
         begin
 			command = $texthandler.command_prompt()
         rescue Exception => e
             $texthandler.write("\nQuitting... #{e.message}")
             abort
         end	
+		if command == "DEBUG"
+			debug = true
+			$texthandler.write("DEBUG MODE ACTIVE")
+		end
         commands() if command == "COMMAND"
         save_game() if command == "SAVE"
         load_game() if command == "LOAD"
-        restorehealth() if command == "RH"
+        restorehealth() if command == "RH" and debug == true
         if command == "BATTLE"
-            value = battle_loop()
+            value = battle_loop(debug)
             if value == false
                 died()
             elsif value == true

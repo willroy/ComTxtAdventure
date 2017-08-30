@@ -1,6 +1,6 @@
 ---
 :name: NAME
-:health: '100'
+:health: 100
 :power: 10
 items:
   - Flashlight
