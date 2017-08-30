@@ -10,34 +10,28 @@
   :name: Hallway
   items:
   - Heal Potion
-  npcs:
-    1:
-      :name: Goblin
-      :type: enemy
-      :health: 50
+  npcs: {}
   :exits:
     Throne Room: WEST
     Starting Room: SOUTH
   :in?: false
 3:
   :name: Throne Room
-  items: []
-  npcs:
-    1:
-      :name: Skeleton
-      :type: enemy
-      :health: 60
+  items:
+  - Gold
+  npcs: {}
   :exits:
     Hallway: EAST
     Treasure Room: WEST
     Hallway 2: SOUTH
-  :in?: false
+  :in?: true
 4:
   :name: Treasure Room
-  items: []
+  items:
+  - Gold
   :exits:
     Throne Room: EAST
-  :in?: true
+  :in?: false
 5:
   :name: Hallway 2
   items: 
