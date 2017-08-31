@@ -3,34 +3,47 @@
   :name: Flashlight
   :type: tool
   :use: Lights up dark areas
+  :does: light
   :equip?: false
 2:
   :name: Gold
   :type: consumable
   :use: Buys items from shops
+  :does: buy
   :equip?: false
 3:
-  :name: Starting Sword
+  :name: Starting-Sword
   :type: weapon
   :use: Can attack npcs with this 
+  :does: attack
   :equip?: false
 4:
-  :name: Heal Potion
+  :name: Heal-Potion
   :type: consumable
   :use: can heal wounds
+  :does: heal
   :equip?: false
 5: 
   :name: Bones
   :type: useless
   :use: none
+  :does: none
   :equip?: false
 6: 
   :name: Meat
   :type: consumable
   :use: eat to replenish health
+  :does: heal
   :equip?: false
 7: 
   :name: Dagger
   :type: weapon
   :use: Can attack npcs with this
+  :does: attack
+  :equip?: false
+8:
+  :name: Damage-Potion
+  :type: consumable
+  :use: deals damage to enemy
+  :does: dealdmg
   :equip?: false

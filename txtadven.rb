@@ -11,9 +11,9 @@ class Character
         File.open('characters.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
         $texthandler.write("Hello #{@name}") #show to player the name
     end
-    def equip
-        $texthandler.write("Which item? ")
-        item = gets.chomp
+    def equip(item)
+        $texthandler.write("Which item? ") if item == nil
+        item = gets.chomp if item == nil
         ininv = false
         $charinfo["items"].each {|k| ininv = true if k == item}
         $charinfo["items"].delete(item) if ininv == true
@@ -30,13 +30,15 @@ class Character
         end
     end
     def inventory
-        $texthandler.write("Inventory:")
+        $texthandler.write_no_new_line("Inventory:") if $charinfo["items"] == nil
+		$texthandler.write("Inventory: ") unless $charinfo["items"] == nil
         itemdupes = $charinfo["items"].inject(Hash.new(0)) {|n, v| n[v] += 1; n }
         itemdupes.to_a.each do |value, count| 
             $texthandler.write "#{value} [#{count}]" if count > 1
             $texthandler.write value if count == 1
         end
-        $texthandler.write("Equipped:")
+        $texthandler.write_no_new_line("Equipped:") if $charinfo["equiped"] == nil
+		$texthandler.write("Equipped:") unless $charinfo["equiped"] == nil
         $texthandler.write $charinfo["equiped"]
     end
     def intoinv(item)
@@ -114,12 +116,15 @@ class BasicTextHandler
     def write(string)
         puts string
     end
+	def write_no_new_line(string)
+		print string
+	end
+    
     def command_prompt
         print "=> "
-		return gets.chomp.upcase 
+		return gets.chomp
     end
 end
-
 class Game
     def initialize
         @character
@@ -187,9 +192,9 @@ class Game
             abort if @quit == true
         end
     end
-    def battle_loop(debug)
-        $texthandler.write("Enemy to battle: ")
-        enemy = gets.chomp
+    def battle_loop(debug, enemy=nil)
+        $texthandler.write("Enemy to battle: ") if enemy == nil
+        enemy = gets.chomp if enemy == nil
         running = false
         enemyid = nil
         if $roominfo[$general_info["current_room"]]["npcs"] == nil
@@ -206,12 +211,13 @@ class Game
         if running == false
             $texthandler.write("No #{enemy} in this room")
         end
-        while running == true do 
+        while running == true do 	
             File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
             File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
             File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml }
             begin
                 command = $texthandler.command_prompt()
+				command.upcase!
             rescue Exception => e
                 $texthandler.write("\nQuitting... #{e.message}")
                 abort
@@ -219,16 +225,18 @@ class Game
             commandbattle() if command == "COMMAND" 
             attk(enemyid) if command == "ATTACK" or command == "A"
             block() if command == "BLOCK" or command == "B"
-            use() if command == "USE" or command == "U"
-            killenemy(enemyid) if command == "KE" and debug = true
-            killchar() if command == "KC" and debug = true 
+            use(enemyid) if command == "USE" or command == "U"
+            killenemy(enemyid) if command == "KE" and debug == true
+            killchar() if command == "KC" and debug == true 
             @character.inventory() if command == "INVENTORY" or command == "INV"
             if  $roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] <= 0
+				$texthandler.write("Your Health: #{$charinfo[:health]} Enemy Health: 0")
                 $roominfo[$general_info["current_room"]]["npcs"].delete(enemyid)
                 return true
             end
             return false if $charinfo[:health].to_i() <= 0 
 			enemy_attk(enemyid)
+			$texthandler.write("Your Health: #{$charinfo[:health]} Enemy Health: #{$roominfo[$general_info["current_room"]]["npcs"][enemyid][:health]}")
         end
     end
 	def enemy_attk(enemyid)
@@ -244,12 +252,11 @@ class Game
     end
     def attk(enemyid)
 		$roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] -= rand($charinfo[:power]-2..$charinfo[:power]+2)
-		$texthandler.write("Your Health: #{$charinfo[:health]} Enemy Health: #{$roominfo[$general_info["current_room"]]["npcs"][enemyid][:health]}")
     end
     def block
     
     end
-    def use
+    def use(enemyid)
         $texthandler.write("Which item? ")
         item = gets.chomp
         itemid = nil
@@ -259,14 +266,27 @@ class Game
         $items.each {|k, v| itemid = k if v[:name] == item}
         usable = true if $items[itemid][:type] == "consumable"
         $texthandler.write("Usable? #{usable} InInv? #{ininv} ItemID: #{itemid}")
+		if usable 
+			$charinfo[:health] += 40 if $items[itemid][:does] = "heal"
+			$roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] -= 10 if $items[itemid][:does] = "dealdmg"
+		end
     end
     def restorehealth
 		$texthandler.write("RESTORED HEALTH")
         $charinfo[:health] = 100
     end
     def command_test(debug)
+		value = nil
         begin
 			command = $texthandler.command_prompt()
+			if command.match(" ")
+				list_com = command.split(" ")
+				command = list_com[0]
+				command.upcase!
+				value = list_com[1]
+			else
+				command.upcase!
+			end		
         rescue Exception => e
             $texthandler.write("\nQuitting... #{e.message}")
             abort
@@ -275,15 +295,17 @@ class Game
 			debug = true
 			$texthandler.write("DEBUG MODE ACTIVE")
 		end
-        commands() if command == "COMMAND"
+		commands() if command == "COMMAND"
         save_game() if command == "SAVE"
         load_game() if command == "LOAD"
         restorehealth() if command == "RH" and debug == true
         if command == "BATTLE"
-            value = battle_loop(debug)
-            if value == false
+			puts "BATTLE"
+            wintest = battle_loop(debug) if value == nil
+			wintest = battle_loop(debug, value) unless value == nil
+            if wintest == false
                 died()
-            elsif value == true
+            elsif wintest == true
                 $texthandler.write("You beat the enemy!")
                 $texthandler.write("You are in the #{$roominfo[$general_info["current_room"]][:name]}")
             else
@@ -291,24 +313,42 @@ class Game
             end
         end
         if command == "PICKUP"
-            $texthandler.write("Which Item? ")
-            item = gets.chomp
-            if @room.pickup(item) == true
-                $texthandler.write("You put #{item} into your inventory.")
-                @character.intoinv(item)
-            else
-                $texthandler.write("There is no #{item} in this room")
-            end
+			if value == nil
+				$texthandler.write("Which Item? ")
+				item = gets.chomp
+				if @room.pickup(item) == true
+					$texthandler.write("You put #{item} into your inventory.")
+					@character.intoinv(item)
+				else
+					$texthandler.write("There is no #{item} in this room")
+				end
+			else	
+				if @room.pickup(value) == true
+					$texthandler.write("You put #{value} into your inventory.")
+					@character.intoinv(value)
+				else
+					$texthandler.write("There is no #{value} in this room")
+				end
+			end
         end
         if command == "PUTDOWN"
-            $texthandler.write("Which Item? ")
-            item = gets.chomp
-            if @character.putdown(item) == true 
-                $texthandler.write("You put the #{item} down in the room")
-                @room.putinroom(item)
-            else
-                $texthandler.write("There is no #{item} in your inventory")
-            end
+			if value == nil
+				$texthandler.write("Which Item? ")
+				item = gets.chomp
+				if @character.putdown(item) == true 
+					$texthandler.write("You put the #{item} down in the room")
+					@room.putinroom(item)
+				else
+					$texthandler.write("There is no #{item} in your inventory")
+				end
+			else	
+				if @character.putdown(value) == true 
+					$texthandler.write("You put the #{value} down in the room")
+					@room.putinroom(value)
+				else
+					$texthandler.write("There is no #{value} in your inventory")
+				end
+			end
         end
         @room.room_in_desc() if command == "ROOM"
         @room.move("NORTH") if command == "NORTH" 
@@ -316,8 +356,8 @@ class Game
         @room.move("EAST") if command == "EAST"
         @room.move("WEST") if command == "WEST"
         @character.inventory() if command == "INVENTORY" or command == "INV"
-        @character.examine() if command == "EXAMINE" or command == "EXAM"
-        @character.equip() if command == "EQUIP" or command == "EQ" 
+        @character.examine() if command == "EXAMINE" or command == "EXAM" and if value == nil
+        @character.equip(value) if command == "EQUIP" or command == "EQ"
         @character.unequip() if command == "UNEQUIP" or command == "UE"
 
         @quit = true if command == "QUIT" 
@@ -414,5 +454,5 @@ elsif option == false
     $texthandler.write("\nYou wake up back where you were...\n\n")
     game.game_loop
 end
-
+end
 # :vim: set expandtab:

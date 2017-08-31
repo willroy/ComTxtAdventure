@@ -10,6 +10,7 @@
   :name: Hallway
   items:
     - Heal Potion
+    - Damage Potion
   npcs:
     1:
         :name: Goblin

@@ -8,14 +8,15 @@
 - 1:
     :name: Starting Room
     items:
-    - Starting Sword
+    - Starting-Sword
     :exits:
       Hallway: NORTH
     :in?: false
   2:
     :name: Hallway
     items:
-    - Heal Potion
+    - Heal-Potion    
+    - Damage-Potion
     npcs:
       1:
         :name: Goblin
