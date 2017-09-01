@@ -125,6 +125,35 @@ class BasicTextHandler
 		return gets.chomp
     end
 end
+
+class CursesTextHandler
+	def draw_inventory
+		$inv.setpos(1, 28)
+		$inv.addstr("Inventory")
+		$inv.setpos(2, 3)
+		$inv.addstr("Items: ")
+		count = 1
+		$charinfo["items"].each do |k|
+			count += 1
+			$inv.setpos(count+1, 3)
+			$inv.addstr "#{k}"
+		end
+		$inv.setpos(count+2, 3)
+		$inv.addstr "Equipped: "
+		$inv.addstr $charinfo["equiped"]
+	end
+	def draw_com_output(text)
+		$com.addstr text
+		$com.setpos(3, 3)
+		count += 1
+	end
+	def command_prompt
+		$com.setpos(2, 3)
+		$com.addstr "=> "
+		return $com.getstr
+	end
+end
+
 class Game
     def initialize
         @character
