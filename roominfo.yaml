@@ -35,7 +35,7 @@
     Hallway: EAST
     Treasure Room: WEST
     Hallway 2: SOUTH
-  :in?: false
+  :in?: true
 4:
   :name: Treasure Room
   items:
@@ -48,4 +48,4 @@
   items: 
   :exits:
     Throne Room: NORTH
-  :in?: true
+  :in?: false
