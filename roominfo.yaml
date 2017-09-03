@@ -11,16 +11,11 @@
   items:
   - Heal-Potion
   - Damage-Potion
-  npcs:
-    1:
-      :name: Goblin
-      :type: enemy
-      :health: 50
-      :power: 5
+  npcs: {}
   :exits:
     Throne Room: WEST
     Starting Room: SOUTH
-  :in?: false
+  :in?: true
 3:
   :name: Throne Room
   items:
@@ -35,7 +30,7 @@
     Hallway: EAST
     Treasure Room: WEST
     Hallway 2: SOUTH
-  :in?: true
+  :in?: false
 4:
   :name: Treasure Room
   items:
