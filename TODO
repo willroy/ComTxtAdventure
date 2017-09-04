@@ -1,24 +1,3 @@
-TODO:
-    Do interaction between character and enemy on entry of room
-    (This means battle time :P) THIS WILL BE A BIG AND AWESOME FEATURE
-    WITH LIKE BATTLE COMMANDS IN BATTLE MODE AND STUFF
-
-commands that work:
- - quit
- - north 
- - south #CAN MOVE NOW 
- - east 
- - west
- - room #to list npcs, room name and items
- - inv / inventory
- - examine # lists use and type 
- - load
- - save
- - command
- - pick up
- - put down
- - equip
- - unequip
- - battle
-    - need to find out how to access enemy health in 
-      current room with the enemy typed
+Get Equip and Unequip to work
+Also get examine to work
+also get battle to fully work (like using heal potions)

@@ -3,6 +3,7 @@
 require 'yaml'
 require 'curses'
 include Curses
+
 class Character
     def change_name
         $text.draw_com_output("Character name? => ") #input text
@@ -13,20 +14,23 @@ class Character
         $text.draw_com_output("Hello #{@name}") #show to player the name
     end
     def equip(item)
+		$text.draw_com_output "yo"
         ininv = false
         $charinfo["items"].each {|k| ininv = true if k == item}
         $charinfo["items"].delete(item) if ininv == true
         $charinfo["equiped"] = item if $charinfo["equiped"] == nil and ininv == true
+		sleep 1.5
     end
     def unequip
         equipped = ""
-        if $charinfo == nil
+        if $charinfo["equiped"] == nil
             $text.draw_com_output ("You have nothing to unequip")
         else
             equipped = $charinfo["equiped"]
             $charinfo["equiped"] = nil
             $charinfo["items"] << equipped
         end
+		sleep 1.5
     end
     def inventory
 		$text.reset_pos
@@ -159,9 +163,9 @@ class CursesTextHandler
 		$text.reset_pos
 	end
 	def draw_other
-		$other.setpos(1, 3)
-		$other.addstr("Health: #{$charinfo[:health]}")
 		$other.setpos(2, 3)
+		$other.addstr("Health: #{$charinfo[:health]}")
+		$other.setpos(3, 3)
 		$other.addstr("You are in the #{$roominfo[$general_info["current_room"]][:name]}")
 	end
 	def draw_com_output(text)
@@ -284,6 +288,7 @@ class Game
 			$other.refresh
 			$other.clear
 			$text.draw_other
+			$text.reset_pos
             File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
             File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
             File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml }
@@ -347,6 +352,7 @@ class Game
     def restorehealth
 		$text.draw_com_output("RESTORED HEALTH")
         $charinfo[:health] = 100
+        File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
     end
     def command_test(debug)
 		value = nil
@@ -417,9 +423,11 @@ class Game
         @room.move("SOUTH") if command == "SOUTH"
         @room.move("EAST") if command == "EAST"
         @room.move("WEST") if command == "WEST"
+		$text.draw_other
         @character.inventory() if command == "INVENTORY" or command == "INV"
         @character.examine() if command == "EXAMINE" or command == "EXAM" and if value == nil
         @character.equip(value) if command == "EQUIP" or command == "EQ"
+		$com.addstr("YOOOO") if command == "EQUIP" or command == "EQ"
         @character.unequip() if command == "UNEQUIP" or command == "UE"
 
         @quit = true if command == "QUIT" 
