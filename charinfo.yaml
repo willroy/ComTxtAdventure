@@ -1,6 +1,6 @@
 ---
 :name: BOB
-:health: 100
+:health: 70
 :power: 10
 items:
 - Flashlight

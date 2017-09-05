@@ -142,31 +142,40 @@ class CursesTextHandler
 	def initialize
 		@count = 0
 	end
-	def ddraw_inventory
-		$inv.setpos(1, 28)
-		$inv.addstr("Inventory")
-		$inv.setpos(2, 3)
-		$inv.addstr("Items: ")
-		@count = 2
-        itemdupes = $charinfo["items"].inject(Hash.new(0)) {|n, v| n[v] += 1; n }
-        itemdupes.to_a.each do |value, count| 
-			@count += 1
-			$inv.setpos(@count, 3)
-			$inv.addstr "#{value} [#{count}]" if count > 1
-			$inv.addstr value if count == 1
-        end
-		$inv.setpos(@count+1, 3)
-		$inv.addstr("Equipped:") if $charinfo["equiped"] == nil
-		$inv.addstr("Equipped:") unless $charinfo["equiped"] == nil
-		$inv.setpos(@count+2, 3)
-		$inv.addstr $charinfo["equiped"]
-		$text.reset_pos
-	end
+	#def draw_inventory
+	#	 $inv.setpos(1, 28)
+	#	 $inv.addstr("Inventory")
+	#	 $inv.setpos(2, 3)
+	#	 $inv.addstr("Items: ")
+	#	 @count = 2
+    #    itemdupes = $charinfo["items"].inject(Hash.new(0)) {|n, v| n[v] += 1; n }
+    #    itemdupes.to_a.each do |value, count| 
+	#		@count += 1
+	# 		$inv.setpos(@count, 3)
+	#		$inv.addstr "#{value} [#{count}]" if count > 1
+	#		$inv.addstr value if count == 1
+    #    end
+	#	 $inv.setpos(@count+1, 3)
+	#  	 $inv.addstr("Equipped:") if $charinfo["equiped"] == nil
+	#	 $inv.addstr("Equipped:") unless $charinfo["equiped"] == nil
+	#	 $inv.setpos(@count+2, 3)
+	#	 $inv.addstr $charinfo["equiped"]
+	#	 $text.reset_pos
+	#end
 	def draw_other
 		$other.setpos(2, 3)
 		$other.addstr("Health: #{$charinfo[:health]}")
 		$other.setpos(3, 3)
 		$other.addstr("You are in the #{$roominfo[$general_info["current_room"]][:name]}")
+	end
+	def draw_other_battle(enemyhealth)
+		$other.setpos(2, 3)
+		$other.addstr("Health: #{$charinfo[:health]}")
+		$other.setpos(3, 3)
+		$other.addstr("Enemy Health: #{enemyhealth}")
+		$other.setpos(4, 3)
+		$other.addstr("You are in the #{$roominfo[$general_info["current_room"]][:name]}")
+		$othera
 	end
 	def draw_com_output(text)
 		@count += 1
@@ -183,13 +192,120 @@ class CursesTextHandler
 		return $com.getstr
 	end
 end
-
+class Battle	
+	def initialize(debug, enemy, character)
+		@enemy = enemy
+		@running = false
+		@enemyid = nil
+		@character = character
+	end
+	def init_battle
+        if $roominfo[$general_info["current_room"]]["npcs"] == nil
+            $text.draw_com_output("No enemies in this room")
+			return "noenemy"
+        end
+        $roominfo[$general_info["current_room"]]["npcs"].each do |key, value|
+            if value[:name] == @enemy
+                $text.draw_com_output("You engage in battle with #{@enemy}")
+                @enemyid = key
+                @running = true
+            end
+        end 
+        if @running == false
+            $text.draw_com_output("No #{@enemy} in this room")
+		elsif @running == true
+			battle_loop()
+		end
+	end
+    def battle_loop
+		$text.draw_other
+        while true do
+            if $roominfo[$general_info["current_room"]]["npcs"][@enemyid][:health] <= 0
+				$text.draw_com_output("Your Health: #{$charinfo[:health]} Enemy Health: 0")
+                $roominfo[$general_info["current_room"]]["npcs"].delete(@enemyid)
+                return true
+            end
+            return false if $charinfo[:health].to_i() <= 0 
+			$com.box("|","-")
+			$other.box("|","-")
+			$other.refresh
+			$other.clear
+			$text.draw_other
+            command_test_battle
+            File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
+            File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
+            File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
+        end
+    end
+    def command_test_battle
+		$text.reset_pos
+        begin
+			command = $text.command_prompt()
+			$com.clear
+			if command.match(" ")
+				list_com = command.split(" ")
+				command = list_com[0]
+				command.upcase!
+				value = list_com[1]
+			else
+				command.upcase!
+			end		
+        rescue Exception => e
+            $text.draw_com_output("\nQuitting... #{e.message}")
+            abort
+        end	
+		commandbattle() if command == "COMMAND" 
+		attk() if command == "ATTACK" or command == "A"
+		block() if command == "BLOCK" or command == "B"
+		use() if command == "USE" or command == "U"
+		killenemy() if command == "KE" and debug == true
+		killchar() if command == "KC" and debug == true 
+		@character.inventory() if command == "INVENTORY" or command == "INV"
+		enemy_attk() if command == "ATTACK" or command == "BLOCK" or command == "USE" or command == "A" or command == "B" or command == "U"
+		if command == "A" or command == "ATTACK" or command == "BLOCK" or command == "B" or command == "USE" or command == "U"
+			$text.draw_com_output("Your Health: #{$charinfo[:health]} Enemy Health: #{$roominfo[$general_info["current_room"]]["npcs"][@enemyid][:health]}") unless $roominfo[$general_info["current_room"]]["npcs"][@enemyid][:health] <= 0 
+		end
+    end
+	def enemy_attk
+		$charinfo[:health] -= rand($roominfo[$general_info["current_room"]]["npcs"][@enemyid][:power]-2..$roominfo[$general_info["current_room"]]["npcs"][@enemyid][:power]+2)
+	end	
+    def killenemy
+        $roominfo[$general_info["current_room"]]["npcs"][@enemyid][:health] = 0
+        $text.draw_com_output("Enemy Health Set To 0")
+    end
+    def killchar
+        $charinfo[:health] = 0
+        $text.draw_com_output("Player Health Set To 0")
+    end
+    def attk
+		$roominfo[$general_info["current_room"]]["npcs"][@enemyid][:health] -= rand($charinfo[:power]-2..$charinfo[:power]+2)
+    end
+    def block
+    
+    end
+    def use
+        $text.draw_com_output("Which item? ")
+        item = gets.chomp
+        itemid = nil
+        ininv = false
+        usable = false
+        $charinfo["items"].each {|k| ininv = true if k == item}
+        $items.each {|k, v| itemid = k if v[:name] == item}
+        usable = true if $items[itemid][:type] == "consumable"
+        $text.draw_com_output("Usable? #{usable} InInv? #{ininv} ItemID: #{itemid}")
+		if usable 
+			$charinfo[:health] += 40 if $items[itemid][:does] = "heal"
+			$roominfo[$general_info["current_room"]]["npcs"][@enemyid][:health] -= 10 if $items[itemid][:does] = "dealdmg"
+		end
+    end
+end
 class Game
     def initialize
         @character
         @room
         @quit = false
         @battle = false
+		@battlehandler
         @savegame
         $texthandler
         $roominfo
@@ -263,92 +379,6 @@ class Game
             abort if @quit == true
         end
     end
-    def battle_loop(debug, enemy=nil)
-        $text.draw_com_output("Enemy to battle: ") if enemy == nil
-        enemy = gets.chomp if enemy == nil
-        running = false
-        enemyid = nil
-        if $roominfo[$general_info["current_room"]]["npcs"] == nil
-            $text.draw_com_output("No enemies in this room")
-            return "no_enemy"
-        end
-        $roominfo[$general_info["current_room"]]["npcs"].each do |key, value|
-            if value[:name] == enemy
-                $text.draw_com_output("You engage in battle with #{enemy}")
-                enemyid = key
-                running = true
-            end
-        end 
-        if running == false
-            $text.draw_com_output("No #{enemy} in this room")
-        end
-        while running == true do 
-			$com.box("|","-")
-			$other.box("|","-")
-			$other.refresh
-			$other.clear
-			$text.draw_other
-			$text.reset_pos
-            File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
-            File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
-            File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml }
-            begin
-                command = $text.command_prompt()
-				command.upcase!
-            rescue Exception => e
-                $text.draw_com_output("\nQuitting... #{e.message}")
-                abort
-            end
-            commandbattle() if command == "COMMAND" 
-            attk(enemyid) if command == "ATTACK" or command == "A"
-            block() if command == "BLOCK" or command == "B"
-            use(enemyid) if command == "USE" or command == "U"
-            killenemy(enemyid) if command == "KE" and debug == true
-            killchar() if command == "KC" and debug == true 
-            @character.inventory() if command == "INVENTORY" or command == "INV"
-            if  $roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] <= 0
-				$text.draw_com_output("Your Health: #{$charinfo[:health]} Enemy Health: 0")
-                $roominfo[$general_info["current_room"]]["npcs"].delete(enemyid)
-                return true
-            end
-            return false if $charinfo[:health].to_i() <= 0 
-			enemy_attk(enemyid)
-			$com.clear
-			$text.draw_com_output("Your Health: #{$charinfo[:health]} Enemy Health: #{$roominfo[$general_info["current_room"]]["npcs"][enemyid][:health]}")
-        end
-    end
-	def enemy_attk(enemyid)
-		$charinfo[:health] -= rand($roominfo[$general_info["current_room"]]["npcs"][enemyid][:power]-2..$roominfo[$general_info["current_room"]]["npcs"][enemyid][:power]+2)
-	end	
-    def killenemy(enemyid)
-        $roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] = 0
-        $text.draw_com_output("Enemy Health Set To 0")
-    end
-    def killchar
-        $charinfo[:health] = 0
-        $text.draw_com_output("Player Health Set To 0")
-    end
-    def attk(enemyid)
-		$roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] -= rand($charinfo[:power]-2..$charinfo[:power]+2)
-    end
-    def block
-    
-    end
-    def use(enemyid)
-        $text.draw_com_output("Which item? ")
-        item = gets.chomp
-        itemid = nil
-        ininv = false
-        usable = false
-        $charinfo["items"].each {|k| ininv = true if k == item}
-        $items.each {|k, v| itemid = k if v[:name] == item}
-        usable = true if $items[itemid][:type] == "consumable"
-        $text.draw_com_output("Usable? #{usable} InInv? #{ininv} ItemID: #{itemid}")
-		if usable 
-			$charinfo[:health] += 40 if $items[itemid][:does] = "heal"
-			$roominfo[$general_info["current_room"]]["npcs"][enemyid][:health] -= 10 if $items[itemid][:does] = "dealdmg"
-		end
-    end
     def restorehealth
 		$text.draw_com_output("RESTORED HEALTH")
         $charinfo[:health] = 100
@@ -371,17 +401,16 @@ class Game
             $text.draw_com_output("\nQuitting... #{e.message}")
             abort
         end	
-		if command == "DEBUG"
-			debug = true
-			$text.draw_com_output("DEBUG MODE ACTIVE")
-		end	
+		debug = true if command == "DEBUG"
+		$text.draw_com_output("DEBUG MODE ACTIVE") if debug == true
 		$text.reset_pos()
 		commands() if command == "COMMAND"
         save_game() if command == "SAVE"
         load_game() if command == "LOAD"
         restorehealth() if command == "RH" and debug == true
         if command == "BATTLE"
-			wintest = battle_loop(debug, value) unless value == nil
+			@battlehandler = Battle.new(debug, value, @character)
+			wintest = @battlehandler.init_battle()
             if wintest == false
                 died()
             elsif wintest == true
