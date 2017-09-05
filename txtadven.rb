@@ -6,20 +6,19 @@ include Curses
 
 class Character
     def change_name
+		$text.reset_pos
         $text.draw_com_output("Character name? => ") #input text
-        @name = gets.chomp #get input
+		@name = $com.getstr() #get input
 
         $charinfo[:name] = @name #Modify
         File.open('characters.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
         $text.draw_com_output("Hello #{@name}") #show to player the name
     end
     def equip(item)
-		$text.draw_com_output "yo"
         ininv = false
         $charinfo["items"].each {|k| ininv = true if k == item}
         $charinfo["items"].delete(item) if ininv == true
         $charinfo["equiped"] = item if $charinfo["equiped"] == nil and ininv == true
-		sleep 1.5
     end
     def unequip
         equipped = ""
@@ -30,7 +29,6 @@ class Character
             $charinfo["equiped"] = nil
             $charinfo["items"] << equipped
         end
-		sleep 1.5
     end
     def inventory
 		$text.reset_pos
@@ -129,12 +127,14 @@ class CursesTextHandler
 		@count = 0
 	end
 	def draw_other
+		$other.clear
 		$other.setpos(2, 3)
 		$other.addstr("Health: #{$charinfo[:health]}")
 		$other.setpos(3, 3)
 		$other.addstr("You are in the #{$roominfo[$general_info["current_room"]][:name]}")
 	end
 	def draw_other_battle(enemyhealth)
+		$other.clear
 		$other.setpos(2, 3)
 		$other.addstr("Health: #{$charinfo[:health]}")
 		$other.setpos(3, 3)
@@ -281,7 +281,7 @@ class Game
         $npcs
     end
     def init_game
-        $texthandler = BasicTextHandler.new
+        $text = CursesTextHandler.new
 		$other = Window.new(7,40,0,0)
 		$com = Window.new(35,80,7,7)
 		$com.box("|","-")
@@ -290,17 +290,22 @@ class Game
 		gametype = $com.getstr()
 		$com.clear
         if gametype.upcase == "NEW" #loads new info for the yml for new game
-            $charinfo = YAML::load_file('defaultchar.yaml')
-            $general_info = YAML::load_file('generaldefault.yaml')
-            $roominfo = YAML::load_file('roomdefault.yaml')
+			@newgame = YAML::load(File.open('newgame.yaml'))
             $items = YAML::load_file('itemlist.yaml')
             $npcs = YAML::load_file('npclist.yaml')
-
-            File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
-            File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
-            File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
+            count = 1
+            @newgame.each do |key, value|
+                if count == 1
+                    $charinfo = key 
+                elsif count == 2
+                    $roominfo = key
+                elsif count == 3
+                    $general_info = key
+                end
+                count += 1
+            end
             @character = Character.new
-            @character.change_name()
+			@character.change_name()
             @room = Room.new
             true
         elsif gametype.upcase == "LOAD" #does the same thing as NEW but different file
@@ -344,11 +349,6 @@ class Game
             abort if @quit == true
         end
     end
-    def restorehealth
-		$text.draw_com_output("RESTORED HEALTH")
-        $charinfo[:health] = 100
-        File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
-    end
     def command_test(debug)
 		value = nil
         begin
@@ -372,7 +372,9 @@ class Game
 		commands() if command == "COMMAND"
         save_game() if command == "SAVE"
         load_game() if command == "LOAD"
-        restorehealth() if command == "RH" and debug == true
+		rh = false
+		rh = true if command == "RH" 
+		$charinfo[:health] = 100 if rh && debug
         if command == "BATTLE"
 			@battlehandler = Battle.new(debug, value, @character)
 			wintest = @battlehandler.init_battle()
@@ -421,7 +423,6 @@ class Game
         @character.inventory() if command == "INVENTORY" or command == "INV"
         @character.examine() if command == "EXAMINE" or command == "EXAM" and if value == nil
         @character.equip(value) if command == "EQUIP" or command == "EQ"
-		$com.addstr("YOOOO") if command == "EQUIP" or command == "EQ"
         @character.unequip() if command == "UNEQUIP" or command == "UE"
 
         @quit = true if command == "QUIT" 
@@ -514,7 +515,7 @@ end
 game = Game.new
 option = game.init_game()
 if option == true
-    game.start_game 
+    game.game_loop 
 elsif option == false
     $text.draw_com_output("You wake up back where you were...")
     game.game_loop

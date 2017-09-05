@@ -1,9 +1,9 @@
 ---
-- :name: BOB
+- :name: NAME
   :health: 100
   :power: 10
   items:
-  - Flashlight
+    - Flashlight
   equiped: 
 - 1:
     :name: Starting Room
@@ -11,13 +11,13 @@
     - Starting-Sword
     :exits:
       Hallway: NORTH
-    :in?: false
+    :in?: true
   2:
     :name: Hallway
     items:
     - Heal-Potion
     - Damage-Potion
-    npcs:
+    npcs: 
       1:
         :name: Goblin
         :type: enemy
@@ -26,11 +26,11 @@
     :exits:
       Throne Room: WEST
       Starting Room: SOUTH
-    :in?: true
+    :in?: false
   3:
     :name: Throne Room
-    items:
-    - Gold
+    items: 
+      - Gold
     npcs:
       1:
         :name: Skeleton
@@ -44,8 +44,8 @@
     :in?: false
   4:
     :name: Treasure Room
-    items:
-    - Gold
+    items: 
+      - Gold
     :exits:
       Throne Room: EAST
     :in?: false
@@ -55,4 +55,4 @@
     :exits:
       Throne Room: NORTH
     :in?: false
-- current_room: 2
+- current_room: 1
