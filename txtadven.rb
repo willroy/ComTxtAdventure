@@ -124,44 +124,10 @@ class Room
         $roominfo[$general_info["current_room"]]["items"] << item
     end
 end
-
-class BasicTextHandler
-    def write(string)
-        puts string
-    end
-	def write_no_new_line(string)
-		print string
-	end
-    def command_prompt
-        print "=> "
-		return gets.chomp
-    end
-end
-
 class CursesTextHandler
 	def initialize
 		@count = 0
 	end
-	#def draw_inventory
-	#	 $inv.setpos(1, 28)
-	#	 $inv.addstr("Inventory")
-	#	 $inv.setpos(2, 3)
-	#	 $inv.addstr("Items: ")
-	#	 @count = 2
-    #    itemdupes = $charinfo["items"].inject(Hash.new(0)) {|n, v| n[v] += 1; n }
-    #    itemdupes.to_a.each do |value, count| 
-	#		@count += 1
-	# 		$inv.setpos(@count, 3)
-	#		$inv.addstr "#{value} [#{count}]" if count > 1
-	#		$inv.addstr value if count == 1
-    #    end
-	#	 $inv.setpos(@count+1, 3)
-	#  	 $inv.addstr("Equipped:") if $charinfo["equiped"] == nil
-	#	 $inv.addstr("Equipped:") unless $charinfo["equiped"] == nil
-	#	 $inv.setpos(@count+2, 3)
-	#	 $inv.addstr $charinfo["equiped"]
-	#	 $text.reset_pos
-	#end
 	def draw_other
 		$other.setpos(2, 3)
 		$other.addstr("Health: #{$charinfo[:health]}")
@@ -316,7 +282,6 @@ class Game
     end
     def init_game
         $texthandler = BasicTextHandler.new
-		$text = CursesTextHandler.new
 		$other = Window.new(7,40,0,0)
 		$com = Window.new(35,80,7,7)
 		$com.box("|","-")
