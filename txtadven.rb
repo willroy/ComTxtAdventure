@@ -6,6 +6,7 @@ include Curses
 
 class Character
     def change_name
+		$com.clear
 		$text.reset_pos
         $text.draw_com_output("Character name? => ") #input text
 		@name = $com.getstr() #get input
@@ -122,42 +123,6 @@ class Room
         $roominfo[$general_info["current_room"]]["items"] << item
     end
 end
-class CursesTextHandler
-	def initialize
-		@count = 0
-	end
-	def draw_other
-		$other.clear
-		$other.setpos(2, 3)
-		$other.addstr("Health: #{$charinfo[:health]}")
-		$other.setpos(3, 3)
-		$other.addstr("You are in the #{$roominfo[$general_info["current_room"]][:name]}")
-	end
-	def draw_other_battle(enemyhealth)
-		$other.clear
-		$other.setpos(2, 3)
-		$other.addstr("Health: #{$charinfo[:health]}")
-		$other.setpos(3, 3)
-		$other.addstr("Enemy Health: #{enemyhealth}")
-		$other.setpos(4, 3)
-		$other.addstr("You are in the #{$roominfo[$general_info["current_room"]][:name]}")
-		$othera
-	end
-	def draw_com_output(text)
-		@count += 1
-		$com.setpos(3+@count, 8)
-		$com.addstr text
-	end
-	def reset_pos
-		@count = 0
-		$com.setpos(3, 3)
-	end
-	def command_prompt
-		$com.setpos(2, 3)
-		$com.addstr "=> "
-		return $com.getstr
-	end
-end
 class Battle	
 	def initialize(debug, enemy, character)
 		@enemy = enemy
@@ -264,6 +229,90 @@ class Battle
 			$roominfo[$general_info["current_room"]]["npcs"][@enemyid][:health] -= 10 if $items[itemid][:does] = "dealdmg"
 		end
     end
+    def commandbattle
+        $text.draw_com_output("\n - Command (List Battle Commands)")
+        $text.draw_com_output(" - Attack / A (Attacks The Enemyy)")
+        $text.draw_com_output(" - Block / B (Blocks An Enemy Attack To Reduce Damage)")
+        $text.draw_com_output(" - Use / U (Uses An Item In Your Inventory)")
+        $text.draw_com_output(" - Inventory / Inv (Lists Items On Character)")
+    end
+end
+class CursesTextHandler
+	def initialize
+		@count = 0
+	end
+	def draw_other
+		$other.clear
+		$other.setpos(2, 3)
+		$other.addstr("Health: #{$charinfo[:health]}")
+		$other.setpos(3, 3)
+		$other.addstr("You are in the #{$roominfo[$general_info["current_room"]][:name]}")
+	end
+	def draw_other_battle(enemyhealth)
+		$other.clear
+		$other.setpos(2, 3)
+		$other.addstr("Health: #{$charinfo[:health]}")
+		$other.setpos(3, 3)
+		$other.addstr("Enemy Health: #{enemyhealth}")
+		$other.setpos(4, 3)
+		$other.addstr("You are in the #{$roominfo[$general_info["current_room"]][:name]}")
+		$othera
+	end
+	def draw_com_output(text)
+		@count += 1
+		$com.setpos(3+@count, 8)
+		$com.addstr text
+	end
+	def reset_pos
+		@count = 0
+		$com.setpos(3, 3)
+	end
+	def command_prompt
+		$com.setpos(2, 3)
+		$com.addstr "=> "
+		return $com.getstr
+	end
+end
+class GameStateHandler
+	def load_game
+		$text.reset_pos
+        $text.draw_com_output("You travel back to your last save...")
+        @savegame = YAML::load(File.open('savegame.yaml'))
+        count = 1
+        @savegame.each do |key, value|
+            #write key
+            if count == 1
+                $charinfo = key 
+            elsif count == 2
+                $roominfo = key
+            elsif count == 3
+                $general_info = key
+            end
+            count += 1
+        end
+	end
+	def save_game
+		data = $charinfo, $roominfo, $general_info
+        File.open('savegame.yaml', 'w') {|f| f.write data.to_yaml } 
+        @savegame = YAML::load(File.open('savegame.yaml'))
+        $text.draw_com_output("SAVED GAME!") 
+	end
+	def new_game	
+		$text.reset_pos
+		$text.draw_com_output("You create a new game...")
+        @newgame = YAML::load(File.open('newgame.yaml'))
+		count = 1
+		@newgame.each do |key, value|
+			if count == 1
+				$charinfo = key 
+			elsif count == 2
+				$roominfo = key
+			elsif count == 3
+				$general_info = key
+			end
+			count += 1
+		end
+	end
 end
 class Game
     def initialize
@@ -273,6 +322,7 @@ class Game
         @battle = false
 		@battlehandler
         @savegame
+		@gamestatehandler
         $texthandler
         $roominfo
         $general_info
@@ -281,7 +331,11 @@ class Game
         $npcs
     end
     def init_game
+    	@room = Room.new
         $text = CursesTextHandler.new
+		@gamestatehandler = GameStateHandler.new
+        $items = YAML::load_file('itemlist.yaml')
+        $npcs = YAML::load_file('npclist.yaml')
 		$other = Window.new(7,40,0,0)
 		$com = Window.new(35,80,7,7)
 		$com.box("|","-")
@@ -290,41 +344,13 @@ class Game
 		gametype = $com.getstr()
 		$com.clear
         if gametype.upcase == "NEW" #loads new info for the yml for new game
-			@newgame = YAML::load(File.open('newgame.yaml'))
-            $items = YAML::load_file('itemlist.yaml')
-            $npcs = YAML::load_file('npclist.yaml')
-            count = 1
-            @newgame.each do |key, value|
-                if count == 1
-                    $charinfo = key 
-                elsif count == 2
-                    $roominfo = key
-                elsif count == 3
-                    $general_info = key
-                end
-                count += 1
-            end
+			@gamestatehandler.new_game
             @character = Character.new
 			@character.change_name()
-            @room = Room.new
             true
         elsif gametype.upcase == "LOAD" #does the same thing as NEW but different file
-            @savegame = YAML::load(File.open('savegame.yaml'))
-            $items = YAML::load_file('itemlist.yaml')
-            $npcs = YAML::load_file('npclist.yaml')
-            count = 1
-            @savegame.each do |key, value|
-                if count == 1
-                    $charinfo = key 
-                elsif count == 2
-                    $roominfo = key
-                elsif count == 3
-                    $general_info = key
-                end
-                count += 1
-            end
+			@gamestatehandler.load_game
             @character = Character.new
-            @room = Room.new
             false
         else
             $text.draw_com_output("")
@@ -341,11 +367,12 @@ class Game
 			$other.box("|","-")
 			$other.refresh
 			$other.clear
-			$text.draw_other
-            command_test(debug)
-            File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
+			$text.draw_other 
+			File.open('general_info.yaml', 'w') {|f| f.write $general_info.to_yaml } 
             File.open('roominfo.yaml', 'w') {|f| f.write $roominfo.to_yaml } 
             File.open('charinfo.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
+
+            command_test(debug)
             abort if @quit == true
         end
     end
@@ -370,8 +397,8 @@ class Game
 		$text.draw_com_output("DEBUG MODE ACTIVE") if debug == true
 		$text.reset_pos()
 		commands() if command == "COMMAND"
-        save_game() if command == "SAVE"
-        load_game() if command == "LOAD"
+		@gamestatehandler.save_game() if command == "SAVE"
+		@gamestatehandler.load_game() if command == "LOAD"
 		rh = false
 		rh = true if command == "RH" 
 		$charinfo[:health] = 100 if rh && debug
@@ -396,22 +423,11 @@ class Game
 			end
         end
         if command == "PUTDOWN"
-			if value == nil
-				$text.draw_com_output("Which Item? ")
-				item = gets.chomp
-				if @character.putdown(item) == true 
-					$text.draw_com_output("You put the #{item} down in the room")
-					@room.putinroom(item)
-				else
-					$text.draw_com_output("There is no #{item} in your inventory")
-				end
-			else	
-				if @character.putdown(value) == true 
-					$text.draw_com_output("You put the #{value} down in the room")
-					@room.putinroom(value)
-				else
-					$text.draw_com_output("There is no #{value} in your inventory")
-				end
+			if @character.putdown(value) == true 
+				$text.draw_com_output("You put the #{value} down in the room")
+				@room.putinroom(value)
+			else
+				$text.draw_com_output("There is no #{value} in your inventory")
 			end
         end
         @room.room_in_desc() if command == "ROOM"
@@ -444,36 +460,6 @@ class Game
         $text.draw_com_output(" - Equip / EQ (Equips Tool / Weapon Into Main Hand)")
         $text.draw_com_output(" - Unequip / UE (Unequips Tool / Weapon Into Inventory)")
         $text.draw_com_output(" - Quit (Work it out)")
-    end
-    def commandbattle
-        $text.draw_com_output("\n - Command (List Battle Commands)")
-        $text.draw_com_output(" - Attack / A (Attacks The Enemyy)")
-        $text.draw_com_output(" - Block / B (Blocks An Enemy Attack To Reduce Damage)")
-        $text.draw_com_output(" - Use / U (Uses An Item In Your Inventory)")
-        $text.draw_com_output(" - Inventory / Inv (Lists Items On Character)")
-    end
-    def save_game
-        data = $charinfo, $roominfo, $general_info
-        File.open('savegame.yaml', 'w') {|f| f.write data.to_yaml } 
-        @savegame = YAML::load(File.open('savegame.yaml'))
-        $text.draw_com_output("SAVED GAME!") 
-    end
-    def load_game 
-		$text.reset_pos
-        $text.draw_com_output("You travel back to your last save...")
-        @savegame = YAML::load(File.open('savegame.yaml'))
-        count = 1
-        @savegame.each do |key, value|
-            #write key
-            if count == 1
-                $charinfo = key 
-            elsif count == 2
-                $roominfo = key
-            elsif count == 3
-                $general_info = key
-            end
-            count += 1
-        end
     end
     def tutorial
         $text.draw_com_output("\nThis is a dungeon text adventure game.")
@@ -515,10 +501,9 @@ end
 game = Game.new
 option = game.init_game()
 if option == true
-    game.game_loop 
+    game.game_loop() 
 elsif option == false
-    $text.draw_com_output("You wake up back where you were...")
-    game.game_loop
+    game.game_loop()
 end
 end
 # :vim: set expandtab:
