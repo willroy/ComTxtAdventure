@@ -1,4 +1,18 @@
 Get Equip and Unequip to work
 Also get examine to work
-also get RH to work
 also get battle to fully work (like using heal potions)
+Work on a menu like so:
+
+    Inventory (1)
+    Character (2)
+    Options   (3)
+    Back      (4)
+    Exit      (5)
+  
+    => 
+
+then work on random encounters rather then set destinations of enemies.
+maybe an option to turn of random encounters (in options) oh and maybe put
+debug commands in there too why not.
+
+random encounters type 391G

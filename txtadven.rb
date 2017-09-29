@@ -8,12 +8,12 @@ class Character
   def change_name
     $com.clear
     $text.reset_pos
-    $text.draw_com_output("Character name? => ") #input text
+    $text.draw("Character name? => ") #input text
     @name = $com.getstr() #get input
 
     $charinfo[:name] = @name #Modify
     File.open('characters.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
-    $text.draw_com_output("Hello #{@name}") #show to player the name
+    $text.draw("Hello #{@name}") #show to player the name
   end
   def equip(item)
     ininv = false
@@ -24,7 +24,7 @@ class Character
   def unequip
     equipped = ""
     if $charinfo["equiped"] == nil
-      $text.draw_com_output ("You have nothing to unequip")
+      $text.draw ("You have nothing to unequip")
     else
       equipped = $charinfo["equiped"]
       $charinfo["equiped"] = nil
@@ -33,16 +33,16 @@ class Character
   end
   def inventory
     $text.reset_pos
-    $text.draw_com_output("Inventory:") if $charinfo["items"] == nil
-    $text.draw_com_output("Inventory: ") unless $charinfo["items"] == nil
+    $text.draw("Inventory:") if $charinfo["items"] == nil
+    $text.draw("Inventory: ") unless $charinfo["items"] == nil
     itemdupes = $charinfo["items"].inject(Hash.new(0)) {|n, v| n[v] += 1; n }
     itemdupes.to_a.each do |value, count| 
-      $text.draw_com_output "#{value} [#{count}]" if count > 1
-      $text.draw_com_output value if count == 1
+      $text.draw "#{value} [#{count}]" if count > 1
+      $text.draw value if count == 1
     end
-    $text.draw_com_output("Equipped:") if $charinfo["equiped"] == nil
-    $text.draw_com_output("Equipped:") unless $charinfo["equiped"] == nil
-    $text.draw_com_output $charinfo["equiped"]
+    $text.draw("Equipped:") if $charinfo["equiped"] == nil
+    $text.draw("Equipped:") unless $charinfo["equiped"] == nil
+    $text.draw $charinfo["equiped"]
     $text.reset_pos
   end
   def intoinv(item)
@@ -52,17 +52,17 @@ class Character
     return true if $charinfo["items"].each {|k| $charinfo["items"].delete(item) if k == item}
   end
   def examine
-    $text.draw_com_output("Which Item? ")
+    $text.draw("Which Item? ")
     item = gets.chomp
     gotitem = false
     $charinfo["items"].each {|v| gotitem = true if item == v}
     gotitem = true if item == $charinfo["equiped"]
     if gotitem == true 
       $items.each do |key, value|
-        $text.draw_com_output("#{value[:name]} is type #{value[:type]} and it:\n #{value[:use]}") if value[:name] == item
+        $text.draw("#{value[:name]} is type #{value[:type]} and it:\n #{value[:use]}") if value[:name] == item
       end
     elsif gotitem == false
-      $text.draw_com_output("You cannot examine an item you do not have")
+      $text.draw("You cannot examine an item you do not have")
     end
   end
 end
@@ -90,25 +90,19 @@ class Room
         end
       end
     end
-    $text.draw_com_output("You cannot go in this direction") if cango == false
-    $text.draw_com_output("You go #{dir}") if cango == true
+    $text.draw("You cannot go in this direction") if cango == false
+    $text.draw("You go #{dir}") if cango == true
   end
   def room_in_desc
     $text.reset_pos()
-    $text.draw_com_output("You are in the #{$roominfo[$general_info["current_room"]][:name]}")
-    $text.draw_com_output("Items in room: ")
+    $text.draw("You are in the #{$roominfo[$general_info["current_room"]][:name]}")
+    $text.draw("Items in room: ")
     if $roominfo[$general_info["current_room"]]["items"] != nil
       $roominfo[$general_info["current_room"]]["items"].each do |k| 
-        $text.draw_com_output(k)
+        $text.draw(k)
       end
     end
-    $text.draw_com_output("Npcs in room: ")
-    if $roominfo[$general_info["current_room"]]["npcs"] != nil
-      $roominfo[$general_info["current_room"]]["npcs"].each do |k, v|
-        $text.draw_com_output(v[:name]) unless v == nil	
-      end
-    end
-    $roominfo[$general_info["current_room"]][:exits].each {|k, v| $text.draw_com_output("There is the #{k} to the #{v}")}
+    $roominfo[$general_info["current_room"]][:exits].each {|k, v| $text.draw("There is the #{k} to the #{v}")}
     $text.reset_pos()
   end
   def pickup(item)
@@ -132,18 +126,18 @@ class Battle
   end
   def init_battle
     if $roominfo[$general_info["current_room"]]["npcs"] == nil
-      $text.draw_com_output("No enemies in this room")
+      $text.draw("No enemies in this room")
       return "noenemy"
     end
     $roominfo[$general_info["current_room"]]["npcs"].each do |key, value|
       if value[:name] == @enemy
-        $text.draw_com_output("You engage in battle with #{@enemy}")
+        $text.draw("You engage in battle with #{@enemy}")
         @enemyid = key
         @running = true
       end
     end 
     if @running == false
-      $text.draw_com_output("No #{@enemy} in this room")
+      $text.draw("No #{@enemy} in this room")
     elsif @running == true
       battle_loop()
     end
@@ -152,7 +146,7 @@ class Battle
     $text.draw_other
     while true do
       if $roominfo[$general_info["current_room"]]["npcs"][@enemyid][:health] <= 0
-        $text.draw_com_output("Your Health: #{$charinfo[:health]} Enemy Health: 0")
+        $text.draw("Your Health: #{$charinfo[:health]} Enemy Health: 0")
         $roominfo[$general_info["current_room"]]["npcs"].delete(@enemyid)
         return true
       end
@@ -182,7 +176,7 @@ class Battle
         command.upcase!
       end		
     rescue Exception => e
-      $text.draw_com_output("\nQuitting... #{e.message}")
+      $text.draw("\nQuitting... #{e.message}")
       abort
     end	
     commandbattle() if command == "COMMAND" 
@@ -194,7 +188,7 @@ class Battle
     @character.inventory() if command == "INVENTORY" or command == "INV"
     enemy_attk() if command == "ATTACK" or command == "BLOCK" or command == "USE" or command == "A" or command == "B" or command == "U"
     if command == "A" or command == "ATTACK" or command == "BLOCK" or command == "B" or command == "USE" or command == "U"
-      $text.draw_com_output("Your Health: #{$charinfo[:health]} Enemy Health: #{$roominfo[$general_info["current_room"]]["npcs"][@enemyid][:health]}") unless $roominfo[$general_info["current_room"]]["npcs"][@enemyid][:health] <= 0 
+      $text.draw("Your Health: #{$charinfo[:health]} Enemy Health: #{$roominfo[$general_info["current_room"]]["npcs"][@enemyid][:health]}") unless $roominfo[$general_info["current_room"]]["npcs"][@enemyid][:health] <= 0 
     end
   end
   def enemy_attk
@@ -202,11 +196,11 @@ class Battle
   end	
   def killenemy
     $roominfo[$general_info["current_room"]]["npcs"][@enemyid][:health] = 0
-    $text.draw_com_output("Enemy Health Set To 0")
+    $text.draw("Enemy Health Set To 0")
   end
   def killchar
     $charinfo[:health] = 0
-    $text.draw_com_output("Player Health Set To 0")
+    $text.draw("Player Health Set To 0")
   end
   def attk
     $roominfo[$general_info["current_room"]]["npcs"][@enemyid][:health] -= rand($charinfo[:power]-2..$charinfo[:power]+2)
@@ -215,7 +209,7 @@ class Battle
 
   end
   def use
-    $text.draw_com_output("Which item? ")
+    $text.draw("Which item? ")
     item = gets.chomp
     itemid = nil
     ininv = false
@@ -223,18 +217,18 @@ class Battle
     $charinfo["items"].each {|k| ininv = true if k == item}
     $items.each {|k, v| itemid = k if v[:name] == item}
     usable = true if $items[itemid][:type] == "consumable"
-    $text.draw_com_output("Usable? #{usable} InInv? #{ininv} ItemID: #{itemid}")
+    $text.draw("Usable? #{usable} InInv? #{ininv} ItemID: #{itemid}")
     if usable 
       $charinfo[:health] += 40 if $items[itemid][:does] = "heal"
       $roominfo[$general_info["current_room"]]["npcs"][@enemyid][:health] -= 10 if $items[itemid][:does] = "dealdmg"
     end
   end
   def commandbattle
-    $text.draw_com_output("\n - Command (List Battle Commands)")
-    $text.draw_com_output(" - Attack / A (Attacks The Enemyy)")
-    $text.draw_com_output(" - Block / B (Blocks An Enemy Attack To Reduce Damage)")
-    $text.draw_com_output(" - Use / U (Uses An Item In Your Inventory)")
-    $text.draw_com_output(" - Inventory / Inv (Lists Items On Character)")
+    $text.draw("\n - Command (List Battle Commands)")
+    $text.draw(" - Attack / A (Attacks The Enemyy)")
+    $text.draw(" - Block / B (Blocks An Enemy Attack To Reduce Damage)")
+    $text.draw(" - Use / U (Uses An Item In Your Inventory)")
+    $text.draw(" - Inventory / Inv (Lists Items On Character)")
   end
 end
 class CursesTextHandler
@@ -258,7 +252,7 @@ class CursesTextHandler
     $other.addstr("You are in the #{$roominfo[$general_info["current_room"]][:name]}")
     $othera
   end
-  def draw_com_output(text)
+  def draw(text)
     @count += 1
     $com.setpos(3+@count, 8)
     $com.addstr text.to_s()
@@ -276,7 +270,7 @@ end
 class GameStateHandler
   def load_game
     $text.reset_pos
-    $text.draw_com_output("You travel back to your last save...")
+    $text.draw("You travel back to your last save...")
     @savegame = YAML::load(File.open('savegame.yaml'))
     count = 1
     @savegame.each do |key, value|
@@ -295,11 +289,11 @@ class GameStateHandler
     data = $charinfo, $roominfo, $general_info
     File.open('savegame.yaml', 'w') {|f| f.write data.to_yaml } 
     @savegame = YAML::load(File.open('savegame.yaml'))
-    $text.draw_com_output("SAVED GAME!") 
+    $text.draw("SAVED GAME!") 
   end
   def new_game	
     $text.reset_pos
-    $text.draw_com_output("You create a new game...")
+    $text.draw("You create a new game...")
     @newgame = YAML::load(File.open('newgame.yaml'))
     count = 1
     @newgame.each do |key, value|
@@ -341,7 +335,7 @@ class Game
     $com = Window.new(35,80,7,7)
     $com.box("|","-")
     $other.box("|","-")
-    $text.draw_com_output("New Game or Load Game? (NEW / LOAD) => ")
+    $text.draw("New Game or Load Game? (NEW / LOAD) => ")
     gametype = $com.getstr()
     $com.clear
     if gametype.upcase == "NEW" #loads new info for the yml for new game
@@ -354,9 +348,9 @@ class Game
       @character = Character.new
       false
     else
-      $text.draw_com_output("")
-      $text.draw_com_output("Invalid Input Option")
-      $text.draw_com_output("Quitting!")
+      $text.draw("")
+      $text.draw("Invalid Input Option")
+      $text.draw("Quitting!")
       abort
     end
   end
@@ -391,45 +385,30 @@ class Game
         command.upcase!
       end		
     rescue Exception => e
-      $text.draw_com_output("\nQuitting... #{e.message}")
+      $text.draw("\nQuitting... #{e.message}")
       abort
     end	
-    if command == "DEBUG"
-      $text.draw_com_output("DEBUG MODE ACTIVE") 
-      @debug = true
-    end
     $text.reset_pos()
     commands() if command == "COMMAND"
     @gamestatehandler.save_game() if command == "SAVE"
     @gamestatehandler.load_game() if command == "LOAD"
     rh = true if command == "RH" 
     $charinfo[:health] = 100 if rh && @debug
-    if command == "BATTLE"
+
+    randomencounter = rand(0...10) 
+    $text.draw(randomencounter)
+    listofdir = ["NORTH", "SOUTH", "EAST", "WEST"]
+    listofdir.each {|k| moving = true if command = k}
+    if randomencounter < 1 
       @battlehandler = Battle.new(@debug, value, @character)
       wintest = @battlehandler.init_battle()
       if wintest == false
         died()
       elsif wintest == true
-        $text.draw_com_output("You beat the enemy!")
-        $text.draw_com_output("You are in the #{$roominfo[$general_info["current_room"]][:name]}")
+        $text.draw("You beat the enemy!")
+        $text.draw("You are in the #{$roominfo[$general_info["current_room"]][:name]}")
       else
 
-      end
-    end
-    if command == "PICKUP"
-      if @room.pickup(value) == true
-        $text.draw_com_output("You put #{value} into your inventory.")
-        @character.intoinv(value)
-      else
-        $text.draw_com_output("There is no #{value} in this room") unless value == nil
-      end
-    end
-    if command == "PUTDOWN"
-      if @character.putdown(value) == true 
-        $text.draw_com_output("You put the #{value} down in the room")
-        @room.putinroom(value)
-      else
-        $text.draw_com_output("There is no #{value} in your inventory")
       end
     end
     @room.room_in_desc() if command == "ROOM"
@@ -443,58 +422,79 @@ class Game
     @character.equip(value) if command == "EQUIP" or command == "EQ"
     @character.unequip() if command == "UNEQUIP" or command == "UE"
 
+    if command == "DEBUG"
+      $text.draw("DEBUG MODE ACTIVE") 
+      @debug = true
+    end
+    if command == "PICKUP"
+      if @room.pickup(value) == true
+        $text.draw("You put #{value} into your inventory.")
+        @character.intoinv(value)
+      else
+        $text.draw("There is no #{value} in this room") unless value == nil
+      end
+    end
+    if command == "PUTDOWN"
+      if @character.putdown(value) == true 
+        $text.draw("You put the #{value} down in the room")
+        @room.putinroom(value)
+      else
+        $text.draw("There is no #{value} in your inventory")
+      end
+    end
+    
     @quit = true if command == "QUIT" 
   end
   def died    
-    $text.draw_com_output("You have died! Quitting...")
+    $text.draw("You have died! Quitting...")
     @quit = true
   end
   def commands
-    $text.draw_com_output(" - Command (Lists Commands)")
-    $text.draw_com_output(" - Save (Saves Game State)")
-    $text.draw_com_output(" - Load (Loads Game State)")
-    $text.draw_com_output(" - Room (Lists Room Info)")
-    $text.draw_com_output(" - Pickup (Picks Up Room Items)")
-    $text.draw_com_output(" - Putdown (Putdown Inventory Items)")
-    $text.draw_com_output(" - North / East / South / West (Goes In The Desired Direction)")
-    $text.draw_com_output(" - Inventory / Inv (Lists Items On Character)")
-    $text.draw_com_output(" - Examine / Exam (Lists Info About An Item In Inventory)")
-    $text.draw_com_output(" - Equip / EQ (Equips Tool / Weapon Into Main Hand)")
-    $text.draw_com_output(" - Unequip / UE (Unequips Tool / Weapon Into Inventory)")
-    $text.draw_com_output(" - Quit (Work it out)")
+    $text.draw(" - Command (Lists Commands)")
+    $text.draw(" - Save (Saves Game State)")
+    $text.draw(" - Load (Loads Game State)")
+    $text.draw(" - Room (Lists Room Info)")
+    $text.draw(" - Pickup (Picks Up Room Items)")
+    $text.draw(" - Putdown (Putdown Inventory Items)")
+    $text.draw(" - North / East / South / West (Goes In The Desired Direction)")
+    $text.draw(" - Inventory / Inv (Lists Items On Character)")
+    $text.draw(" - Examine / Exam (Lists Info About An Item In Inventory)")
+    $text.draw(" - Equip / EQ (Equips Tool / Weapon Into Main Hand)")
+    $text.draw(" - Unequip / UE (Unequips Tool / Weapon Into Inventory)")
+    $text.draw(" - Quit (Work it out)")
   end
   def tutorial
-    $text.draw_com_output("\nThis is a dungeon text adventure game.")
-    $text.draw_com_output("The aim of this game is to become the leader of the dungeon")
-    $text.draw_com_output("and replace the current king of the dungeon.")
-    $text.draw_com_output("However the current king is hiding out and must be killed first.")
-    $text.draw_com_output("\nThe game requires use of commands to navigate through.")
-    $text.draw_com_output("These are the commands: ")
-    $text.draw_com_output("\n - Command (Lists Commands)")
-    $text.draw_com_output(" - Save (Saves Game State)")
-    $text.draw_com_output(" - Load (Loads Game State)")
-    $text.draw_com_output(" - Room (Lists Room Info)")
-    $text.draw_com_output(" - Pickup (Picks Up Room Items)")
-    $text.draw_com_output(" - Putdown (Putdown Inventory Items)")
-    $text.draw_com_output(" - North / East / South / West (Goes In The Desired Direction If Possible)")
-    $text.draw_com_output(" - Inventory / Inv (Lists Items On Character)")
-    $text.draw_com_output(" - Examine / Exam (Lists Info About An Item In Inventory)")
-    $text.draw_com_output(" - Equip / EQ (Equips Tool / Weapon Into Main Hand)")
-    $text.draw_com_output(" - Unequip / UE (Unequips Tool / Weapon Into Inventory)")
-    $text.draw_com_output(" - Quit (Work it out)\n\n")
+    $text.draw("\nThis is a dungeon text adventure game.")
+    $text.draw("The aim of this game is to become the leader of the dungeon")
+    $text.draw("and replace the current king of the dungeon.")
+    $text.draw("However the current king is hiding out and must be killed first.")
+    $text.draw("\nThe game requires use of commands to navigate through.")
+    $text.draw("These are the commands: ")
+    $text.draw("\n - Command (Lists Commands)")
+    $text.draw(" - Save (Saves Game State)")
+    $text.draw(" - Load (Loads Game State)")
+    $text.draw(" - Room (Lists Room Info)")
+    $text.draw(" - Pickup (Picks Up Room Items)")
+    $text.draw(" - Putdown (Putdown Inventory Items)")
+    $text.draw(" - North / East / South / West (Goes In The Desired Direction If Possible)")
+    $text.draw(" - Inventory / Inv (Lists Items On Character)")
+    $text.draw(" - Examine / Exam (Lists Info About An Item In Inventory)")
+    $text.draw(" - Equip / EQ (Equips Tool / Weapon Into Main Hand)")
+    $text.draw(" - Unequip / UE (Unequips Tool / Weapon Into Inventory)")
+    $text.draw(" - Quit (Work it out)\n\n")
   end
   def start_game
-    $text.draw_com_output("You wake up in an empty room")
-    $text.draw_com_output("#{$charinfo['name']} => Where am I?")
-    $text.draw_com_output("You see a door to the north of the room")
-    $text.draw_com_output("Would you like a tutorial? (Y/n) ")
+    $text.draw("You wake up in an empty room")
+    $text.draw("#{$charinfo['name']} => Where am I?")
+    $text.draw("You see a door to the north of the room")
+    $text.draw("Would you like a tutorial? (Y/n) ")
     tut = gets.chomp
     if tut.upcase == "Y"
-      $text.draw_com_output("Running tutorial...")
+      $text.draw("Running tutorial...")
       tutorial()
       game_loop()
     elsif tut.upcase == "N"
-      $text.draw_com_output("Ok!")
+      $text.draw("Ok!")
       game_loop()
     end
   end
