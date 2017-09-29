@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-
+#random edi
 require 'yaml'
 
 class Character
