@@ -20,7 +20,7 @@
   :exits:
     Throne Room: WEST
     Starting Room: SOUTH
-  :in?: false
+  :in?: true
 3:
   :name: Throne Room
   items:
