@@ -1,5 +1,5 @@
 ---
-- :name: NAME
+- :name: BOB
   :health: 100
   :power: 10
   items:
@@ -11,20 +11,32 @@
     - Starting-Sword
     :exits:
       Hallway: NORTH
-    :in?: true
+    :in?: false
   2:
     :name: Hallway
     items:
     - Heal-Potion
     - Damage-Potion
+    npcs:
+      1:
+        :name: Goblin
+        :type: enemy
+        :health: 50
+        :power: 5
     :exits:
       Throne Room: WEST
       Starting Room: SOUTH
-    :in?: false
+    :in?: true
   3:
     :name: Throne Room
     items:
     - Gold
+    npcs:
+      1:
+        :name: Skeleton
+        :type: enemy
+        :health: 60
+        :power: 6
     :exits:
       Hallway: EAST
       Treasure Room: WEST
@@ -43,4 +55,4 @@
     :exits:
       Throne Room: NORTH
     :in?: false
-- current_room: 1
+- current_room: 2
