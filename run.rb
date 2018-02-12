@@ -204,6 +204,10 @@ class Game
         @character.equip(value)
       when "UNEQUIP"
         @character.unequip()
+      when "PICKUP"
+        @room.pickup(value, @character)
+      when "PUTDOWN"
+        @character.putdown(value, @room)
     end
 
     randomencounter = 2
@@ -219,19 +223,7 @@ class Game
       end
     end
     @text.draw_other
-    if command == "PICKUP"
-    @room.pickup(value, @character) 
-        @text.draw("There is no #{value} in this room") unless value == nil
-      end
-    if command == "PUTDOWN"
-      if @character.putdown(value) == true 
-        @text.draw("You put the #{value} down in the room")
-        @room.putinroom(value)
-      else
-        @text.draw("There is no #{value} in your inventory")
-      end
-    end
-    
+      
   end
   def died    
     @text.draw("You have died! Quitting...")

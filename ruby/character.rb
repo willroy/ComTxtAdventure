@@ -14,9 +14,12 @@ class Character
   end
   def equip(item)
     ininv = false
+    @text.reset_pos
+    @text.draw("Trying To Equip...")
     $charinfo["items"].each {|k| ininv = true if k == item}
     $charinfo["items"].delete(item) if ininv == true
     $charinfo["equiped"] = item if $charinfo["equiped"] == nil and ininv == true
+    @text.draw("Equipped!") if ininv == true
   end
   def unequip
     equipped = ""
@@ -45,8 +48,15 @@ class Character
   def intoinv(item)
     $charinfo["items"] << item
   end
-  def putdown(item)
-    return true if $charinfo["items"].each {|k| $charinfo["items"].delete(item) if k == item}
+  def putdown(item, room)
+    worked = nil
+    worked = true if $charinfo["items"].each {|k| $charinfo["items"].delete(item) if k == item}
+    if worked 
+      @text.draw("You put the #{value} down in the room")
+      room.putinroom(value)
+    else
+      @text.draw("There is no #{value} in your inventory")
+    end
   end
   def examine
     @text.draw("Which Item? ")
