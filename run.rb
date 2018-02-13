@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
- 
+
 require 'yaml'
 require 'curses'
 require_relative 'ruby/room'

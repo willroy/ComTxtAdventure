@@ -1,10 +1,11 @@
 ---
 1:
   :name: Starting Room
-  items: []
+  items:
+  - Starting-Sword
   :exits:
     Hallway: NORTH
-  :in?: true
+  :in?: false
 2:
   :name: Hallway
   items:
@@ -13,7 +14,7 @@
   :exits:
     Throne Room: WEST
     Starting Room: SOUTH
-  :in?: false
+  :in?: true
 3:
   :name: Throne Room
   items:

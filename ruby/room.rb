@@ -1,4 +1,3 @@
-
 class Room
   def initialize(text)
     @text = text
