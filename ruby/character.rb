@@ -4,10 +4,35 @@ class Character
   end
   def change_name
     $com.clear
-    @text.reset_pos
     @text.draw("Character name? => ") #input text
     @name = $com.getstr() #get input
-
+    @text.draw("")
+    @text.draw("")
+    @text.draw("")
+    @text.draw("")            
+    @text.draw("")
+    draw1 = %(             _..-'(                       )`-.._)
+    draw2 = %(           ./'. '||\\\\.       (\\_/)       .//||` .`\.)
+    draw3 = %(       ./'.|'.'||||\\\\|..     \)O O\(    ..|//||||`.`|.`\.)
+    draw4 = %(     ./'..|'.|| |||||\\`````` '`''` ''''''/||||| ||.`|..`\.)
+    draw5 = %(   ./'.||'.|||| ||||||||||||.     .|||||||||||| |||||.`||.`\.)
+    draw6 = %(  /'|||'.|||||| ||||||||||||{     }|||||||||||| ||||||.`|||`\\)            
+    draw7 = %( '.|||'.||||||| ||||||||||||{     }|||||||||||| |||||||.'|||.')
+    draw8 = %('.||| ||||||||| |/'   ``\\||``     ''||/''   `\\| ||||||||| |||.`)
+    draw9 = %(|/' \\./'     `\\./         \\!|\\   /|!/         \\./'     `\\./ `\\|)
+    draw10= %(V    V         V          }' `\\ /' `{          V         V    V)
+    draw11= %(`    `         `               V               '         '    ')
+    @text.draw(draw1)            
+    @text.draw(draw2)            
+    @text.draw(draw3)            
+    @text.draw(draw4)            
+    @text.draw(draw5)            
+    @text.draw(draw6)            
+    @text.draw(draw7)            
+    @text.draw(draw8)            
+    @text.draw(draw9)            
+    @text.draw(draw10)            
+    @text.draw(draw11)            
     $charinfo[:name] = @name #Modify
     File.open('characters.yaml', 'w') {|f| f.write $charinfo.to_yaml } 
     @text.draw("Hello #{@name}") #show to player the name

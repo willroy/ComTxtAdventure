@@ -119,7 +119,7 @@ class Game
     gametype = $com.getstr()
     $com.clear
     if gametype.upcase == "NEW" #loads new info for the yaml for new game
-      @gamestatehandler.new_game
+      @gamestatehandler.new_game() 
       @character = Character.new(@text)
       @character.change_name()
       true
